@@ -4,13 +4,23 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.GamePad;
+import frc.robot.Constants.Laptop;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ScaledArcadeDriveCommand;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+//import frc.robot.subsystems.DriveSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -21,15 +31,42 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private DriveSubsystem m_driveSubsystem = null;
+  //private SensorArraySubsystem m_sensorArray = null;
+  private Compressor m_pcmCompressor = null;
+  private Solenoid m_exampleSolenoidPCM = null;
+  private boolean m_solenoidState = false;
+  // Operator interface
+  private Joystick m_gamePad = null;
+  private JoystickButton m_JSRightButton; 
+  
+  // Cameras
+  private UsbCamera m_camera1;
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  //private PhotonCamera m_photonCamera;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Subsystems (comment out to exclude a subsystem from the robot)
+    m_driveSubsystem = new DriveSubsystem();
+
+    //m_sensorArray = new SensorArraySubsystem();
+    //m_pcmCompressor = new Compressor(0, CanID.kLeftLeader);
+   // m_exampleSolenoidPCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+    // Controllers (comment out to exclude a controller from the laptop)
+    m_gamePad = new Joystick(Laptop.UsbPort.kGamePad);
+
+    // Cameras (comment out to exclude a camera from the robot);
+    //m_camera1 = CameraServer.startAutomaticCapture(0);
+    if (m_camera1 != null) {
+      m_camera1.setResolution(320, 240);
+    }
+
+   // m_photonCamera = new PhotonCamera("photonvision/Microsoft_LifeCam_HD-3000");
+
     // Configure the trigger bindings
-    configureBindings();
+    configureButtonBindings();
+    configureDefaultCommands();
   }
 
   /**
@@ -41,16 +78,32 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
+  private void configureButtonBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    
+    // Testing turning the robot
+    // new JoystickButton(m_gamePad, GamePad.Button.kX)
+    // .whileTrue(Commands.run(() -> m_driveSubsystem.arcadeDrive(0, 0.2), m_driveSubsystem))
+    // .onFalse(Commands.run(() -> m_driveSubsystem.stop(), m_driveSubsystem))
+  ;
   }
+  
+  
+  private void configureDefaultCommands() {
 
+    if (m_driveSubsystem != null && m_gamePad != null) {
+      m_driveSubsystem.setDefaultCommand(new ScaledArcadeDriveCommand(m_driveSubsystem, 
+        () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown)* 0.75, 
+        () -> m_gamePad.getRawAxis(GamePad.LeftStick.kLeftRight) * 0.75
+      ));
+    }
+  }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
