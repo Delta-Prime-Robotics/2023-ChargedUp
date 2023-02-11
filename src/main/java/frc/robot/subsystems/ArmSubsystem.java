@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -11,18 +12,21 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class ArmSubsystem extends SubsystemBase {
-    //defining the spark max arm controler
+    //defining the spark max arm motor
     private CANSparkMax m_armMotor;
+    
+    //arm speed scale factor
+    private final double kScaleFactor = 0.5;
     
     //Defineing the arm encoder
     private RelativeEncoder m_armEncoder;
     
     public ArmSubsystem() {
         m_armMotor = new CANSparkMax(RoboRio.CanID.kArmControler, MotorType.kBrushless);
-        //Need  value for Arm Encoder in Constents
-        // m_armEncoder = m_armControler.getEncoder();
+        // Need  value for Arm Encoder in Constents
+        m_armEncoder = m_armMotor.getEncoder();
         
-        // m_armEncoder.setPositionConversionFactor(0)
+        m_armEncoder.setPositionConversionFactor(0);
 
         m_armMotor.setSmartCurrentLimit(30, 90, 10);
     }
@@ -47,7 +51,12 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
   }
 
-  public void stop() {
-    m_armMotor.set(0);
+  public Command ArmForward(double speed) {
+    return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});
+
+  }
+
+  public Command ArmBackward(double speed) {
+    return startEnd(() -> {this.m_armMotor.set(-0.5);}, () -> {m_armMotor.set(0.0);});
   }
 }
