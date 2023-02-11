@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.concurrent.PriorityBlockingQueue;
+
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
@@ -18,9 +20,11 @@ import frc.robot.Constants.Laptop;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.ScaledArcadeDriveCommand;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 //import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -32,10 +36,13 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private DriveSubsystem m_driveSubsystem = null;
+  private IntakeSubsystem m_IntakeSubsystem = null;
+  private ArmSubsystem m_ArmSubsystem = null;
   //private SensorArraySubsystem m_sensorArray = null;
   private Compressor m_pcmCompressor = null;
   private Solenoid m_exampleSolenoidPCM = null;
   private boolean m_solenoidState = false;
+  
   // Operator interface
   private Joystick m_gamePad = null;
   private JoystickButton m_JSRightButton; 
@@ -49,6 +56,8 @@ public class RobotContainer {
   public RobotContainer() {
     // Subsystems (comment out to exclude a subsystem from the robot)
     m_driveSubsystem = new DriveSubsystem();
+    m_ArmSubsystem = new ArmSubsystem();
+    m_IntakeSubsystem = new IntakeSubsystem();
 
     //m_sensorArray = new SensorArraySubsystem();
     //m_pcmCompressor = new Compressor(0, CanID.kLeftLeader);
@@ -86,11 +95,30 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    if (m_IntakeSubsystem != null && m_gamePad != null){
+      new JoystickButton(m_gamePad, GamePad.Button.kA)
+        .whileTrue(Commands.run(()-> m_IntakeSubsystem.IntakeGo(0.8), m_IntakeSubsystem))
+        .onFalse(Commands.run(() -> m_IntakeSubsystem.IntakeStop(), m_IntakeSubsystem))
+      ;
+
+      new JoystickButton(m_gamePad, GamePad.Button.kB)
+        .whileTrue(Commands.run(()-> m_IntakeSubsystem.IntakeGo(-0.4), m_IntakeSubsystem))
+        .onFalse(Commands.run(() -> m_IntakeSubsystem.IntakeStop(), m_IntakeSubsystem))
+      ;
+    }
+
+    if (m_ArmSubsystem != null && m_gamePad != null){
+      
+      new JoystickButton(m_gamePad, GamePad.Button.kX)
+        .whileTrue(Commands.run(()-> m_ArmSubsystem.ArmForward(0.8),m_ArmSubsystem)) 
+      ;
+
+      new JoystickButton(m_gamePad, GamePad.Button.kY)
+        .whileTrue(Commands.run(()-> m_ArmSubsystem.ArmBackward(-0.4), m_ArmSubsystem))
+      ;
+    }
+  
     
-    // Testing turning the robot
-    // new JoystickButton(m_gamePad, GamePad.Button.kX)
-    // .whileTrue(Commands.run(() -> m_driveSubsystem.arcadeDrive(0, 0.2), m_driveSubsystem))
-    // .onFalse(Commands.run(() -> m_driveSubsystem.stop(), m_driveSubsystem))
   ;
   }
   
@@ -104,6 +132,8 @@ public class RobotContainer {
       ));
     }
   }
+  
+  
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
