@@ -29,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
         // Need  value for Intake Encoder in Constents
         m_intakeEncoder.setPositionConversionFactor(1);
 
-        m_intakeMotor.setSmartCurrentLimit(30, 90, 10);
+        //m_intakeMotor.setSmartCurrentLimit(30, 90, 10);
     }
 
     /**
@@ -52,15 +52,9 @@ public class IntakeSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Intake Motor Speed", m_intakeMotor.get());
   }
 
-  public CommandBase IntakeStop() {
-    return runOnce(
-    () -> {
-    m_intakeMotor.set(0);
-  });
-  }
 
   public CommandBase IntakeGo(double speed) {
-    return runOnce(
+    return run(
     () -> {
       double intakeSpeed = speed;
       if (intakeSpeed > -1) {

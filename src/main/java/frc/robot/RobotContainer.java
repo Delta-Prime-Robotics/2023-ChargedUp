@@ -97,13 +97,13 @@ public class RobotContainer {
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
     if (m_IntakeSubsystem != null && m_gamePad != null){
       new JoystickButton(m_gamePad, GamePad.Button.kA)
-        .whileTrue(Commands.run(()-> m_IntakeSubsystem.IntakeGo(0.8), m_IntakeSubsystem))
-        .onFalse(Commands.run(() -> m_IntakeSubsystem.IntakeStop(), m_IntakeSubsystem))
+        .whileTrue(m_IntakeSubsystem.IntakeGo(0.8))
+        .onFalse(m_IntakeSubsystem.IntakeGo(0))
       ;
 
       new JoystickButton(m_gamePad, GamePad.Button.kB)
-        .whileTrue(Commands.run(()-> m_IntakeSubsystem.IntakeGo(-0.4), m_IntakeSubsystem))
-        .onFalse(Commands.run(() -> m_IntakeSubsystem.IntakeStop(), m_IntakeSubsystem))
+        .whileTrue(m_IntakeSubsystem.IntakeGo(-0.4))
+        .onFalse(m_IntakeSubsystem.IntakeGo(0))
       ;
     }
 
