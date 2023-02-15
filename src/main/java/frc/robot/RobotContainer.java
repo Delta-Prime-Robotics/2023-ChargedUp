@@ -110,11 +110,11 @@ public class RobotContainer {
     if (m_ArmSubsystem != null && m_gamePad != null){
       
       new JoystickButton(m_gamePad, GamePad.Button.kX)
-        .whileTrue(Commands.run(()-> m_ArmSubsystem.ArmForward(0.8),m_ArmSubsystem)) 
+        .whileTrue(m_ArmSubsystem.ArmForward(0)) 
       ;
 
       new JoystickButton(m_gamePad, GamePad.Button.kY)
-        .whileTrue(Commands.run(()-> m_ArmSubsystem.ArmBackward(-0.4), m_ArmSubsystem))
+        .whileTrue(m_ArmSubsystem.ArmBackward(0))
       ;
     }
   
