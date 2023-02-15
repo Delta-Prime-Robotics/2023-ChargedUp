@@ -51,12 +51,29 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
   }
 
-  public Command ArmForward(double speed) {
-    return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});
+  // public Command ArmForward(double speed) {
+  //   return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});
 
-  }
+  // }
 
-  public Command ArmBackward(double speed) {
-    return startEnd(() -> {this.m_armMotor.set(-0.5);}, () -> {m_armMotor.set(0.0);});
-  }
+  // public Command ArmBackward(double speed) {
+  //   return startEnd(() -> {this.m_armMotor.set(-0.5);}, () -> {m_armMotor.set(0.0);});
+  // }
+
+
+  public CommandBase ArmGo(double speed) {
+    return run(
+      () -> {
+        double armSpeed = speed;
+        if (armSpeed < -1) {
+          armSpeed = -1;
+        }
+        else if (armSpeed > 1){
+          armSpeed = 1;
+        }
+        m_armMotor.set(speed * kScaleFactor);
+        SmartDashboard.putNumber("Arm Speed", speed);
+      });
+  };
+
 }
