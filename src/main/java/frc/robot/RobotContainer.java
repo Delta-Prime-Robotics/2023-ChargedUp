@@ -107,20 +107,11 @@ public class RobotContainer {
       new JoystickButton(m_gamePad, GamePad.Button.kB)
         .whileTrue(m_IntakeSubsystem.IntakeGo(-0.4))
         .onFalse(m_IntakeSubsystem.IntakeGo(0))
-      ;
-    }
-<<<<<<< HEAD
-=======
+        ;}
+        
+       }
+
     
-    if (m_ArmSubsystem != null && m_gamePad != null) {
-      m_ArmSubsystem.setDefaultCommand(m_ArmSubsystem.ArmGo(
-       m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
-      
-      ));
-    }
->>>>>>> cd10b8fe166f14f45f5d4d6c8648c2c765676aa4
-  }
-  
   
   private void configureDefaultCommands() {
 
