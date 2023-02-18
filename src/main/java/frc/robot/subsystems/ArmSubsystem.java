@@ -51,6 +51,7 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
   }
 
+<<<<<<< HEAD
 
   private double applyLinearConstraints(double forwardSpeed) {
     double result = forwardSpeed;
@@ -88,4 +89,31 @@ public class ArmSubsystem extends SubsystemBase {
     m_armMotor.set(forwardSpeed);
   }
 
+=======
+  // public Command ArmForward(double speed) {
+  //   return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});
+
+  // }
+
+  // public Command ArmBackward(double speed) {
+  //   return startEnd(() -> {this.m_armMotor.set(-0.5);}, () -> {m_armMotor.set(0.0);});
+  // }
+
+
+  public CommandBase ArmGo(double speed) {
+    return run(
+      () -> {
+        double armSpeed = speed;
+        if (armSpeed < -1) {
+          armSpeed = -1;
+        }
+        else if (armSpeed > 1){
+          armSpeed = 1;
+        }
+        m_armMotor.set(speed * kScaleFactor);
+        SmartDashboard.putNumber("Arm Speed", speed);
+      });
+  };
+
+>>>>>>> cd10b8fe166f14f45f5d4d6c8648c2c765676aa4
 }

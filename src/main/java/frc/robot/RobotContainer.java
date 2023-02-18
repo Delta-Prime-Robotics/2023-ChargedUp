@@ -98,7 +98,7 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-    if (m_IntakeSubsystem != null && m_gamePad != null){
+    if (m_IntakeSubsystem != null && m_gamePad != null) {
       new JoystickButton(m_gamePad, GamePad.Button.kA)
         .whileTrue(m_IntakeSubsystem.IntakeGo(0.8))
         .onFalse(m_IntakeSubsystem.IntakeGo(0))
@@ -109,6 +109,16 @@ public class RobotContainer {
         .onFalse(m_IntakeSubsystem.IntakeGo(0))
       ;
     }
+<<<<<<< HEAD
+=======
+    
+    if (m_ArmSubsystem != null && m_gamePad != null) {
+      m_ArmSubsystem.setDefaultCommand(m_ArmSubsystem.ArmGo(
+       m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
+      
+      ));
+    }
+>>>>>>> cd10b8fe166f14f45f5d4d6c8648c2c765676aa4
   }
   
   
