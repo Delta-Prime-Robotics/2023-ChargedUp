@@ -88,6 +88,8 @@ public class ArmSubsystem extends SubsystemBase {
     m_armMotor.set(forwardSpeed);
   }
 
+  
+  
 
   // public Command ArmForward(double speed) {
   //   return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});
