@@ -51,12 +51,41 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
   }
 
-  public Command ArmForward(double speed) {
-    return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});
 
+  private double applyLinearConstraints(double forwardSpeed) {
+    double result = forwardSpeed;
+
+    final double kDeadzone = 0.05;
+    final double kMinNeededToMove = 0.1;
+    final double kSpeedLimit = 0.8;       // This should be a value <= 1.0
+
+    double absSpeed = Math.abs(forwardSpeed);
+
+    if (absSpeed < kDeadzone) {
+      result = 0.0;
+    }
+    else if (absSpeed < kMinNeededToMove) {
+      result = 0.1 * (forwardSpeed/Math.abs(forwardSpeed));
+    }
+    else if (absSpeed > kSpeedLimit)
+    {
+      result = kSpeedLimit * (forwardSpeed/Math.abs(forwardSpeed));
+    }
+
+    return result;
   }
 
-  public Command ArmBackward(double speed) {
-    return startEnd(() -> {this.m_armMotor.set(-0.5);}, () -> {m_armMotor.set(0.0);});
+
+  public void stop() {
+
+    m_armMotor.set(0.0);
   }
+
+  public void ArmGo(double forwardSpeed) {
+
+    forwardSpeed = applyLinearConstraints(forwardSpeed);
+
+    m_armMotor.set(forwardSpeed);
+  }
+
 }
