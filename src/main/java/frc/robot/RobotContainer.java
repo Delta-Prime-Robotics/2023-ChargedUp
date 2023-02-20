@@ -10,6 +10,8 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -54,6 +56,10 @@ public class RobotContainer {
 
   //private PhotonCamera m_photonCamera;
 
+  // Set up chooser for the autonomous routine
+  SendableChooser<Command> m_autonomousChooser = new SendableChooser<>();
+
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Subsystems (comment out to exclude a subsystem from the robot)
@@ -79,6 +85,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
     configureDefaultCommands();
+    configureAutonomousChooser();
   }
 
   /**
@@ -129,6 +136,19 @@ public class RobotContainer {
 
   }
   
+  private void configureAutonomousChooser() {
+    if (m_driveSubsystem != null) {
+      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem));
+
+      m_autonomousChooser.addOption("Drop and Go", Autos.dropAndGo(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
+
+      m_autonomousChooser.addOption("Drop and Dock", Autos.dropAndDock(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
+    }
+    
+    m_autonomousChooser.addOption("Do Nothing", Autos.doNothing());
+    
+    SmartDashboard.putData("Autonomous", m_autonomousChooser);
+  }
   
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -137,6 +157,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return m_autonomousChooser.getSelected();
   }
 }
