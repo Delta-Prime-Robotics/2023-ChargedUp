@@ -6,8 +6,6 @@ import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import com.revrobotics.*;
-import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.*;
 
@@ -29,7 +27,7 @@ public class IntakeSubsystem extends SubsystemBase {
         // Need  value for Intake Encoder in Constents
         m_intakeEncoder.setPositionConversionFactor(1);
 
-        //m_intakeMotor.setSmartCurrentLimit(30, 90, 10);
+        m_intakeMotor.setSmartCurrentLimit(30, 90, 10);
     }
 
     /**
@@ -53,6 +51,11 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
 
+  /**
+   * Scales imputed speed and sets speed to either -1 or 1
+   * @param speed
+   * @return a run command
+   */
   public CommandBase IntakeGo(double speed) {
     return run(
     () -> {

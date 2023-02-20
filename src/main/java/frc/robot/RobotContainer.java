@@ -41,9 +41,9 @@ public class RobotContainer {
   private IntakeSubsystem m_IntakeSubsystem = null;
   private ArmSubsystem m_ArmSubsystem = null;
   //private SensorArraySubsystem m_sensorArray = null;
-  private Compressor m_pcmCompressor = null;
-  private Solenoid m_exampleSolenoidPCM = null;
-  private boolean m_solenoidState = false;
+  // private Compressor m_pcmCompressor = null;
+  // private Solenoid m_exampleSolenoidPCM = null;
+  // private boolean m_solenoidState = false;
   
   // Operator interface
   private Joystick m_gamePad = null;

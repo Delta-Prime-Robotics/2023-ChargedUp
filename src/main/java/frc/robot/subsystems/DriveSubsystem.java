@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -11,19 +12,15 @@ import com.revrobotics.*;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.RoboRio;
 import frc.robot.Constants.RobotConfig;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.SPI;
 import com.kauailabs.navx.frc.*;
-
-import static frc.robot.Constants.*;
 
 public class DriveSubsystem extends SubsystemBase {
   
@@ -79,36 +76,6 @@ public class DriveSubsystem extends SubsystemBase {
         }
   }
 
-  /**
-   * This command resets the left and right Encoders
-   * 
-   * @return a runOnce
-   */
-  public CommandBase resetEncoders() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-            m_leftEncoder.setPosition(0.0);
-            m_rightEncoder.setPosition(0.0);
-        });
-  }
-
-  public void setClosedLoopRampRate(double rate) {
-    this.m_leftLeader.setClosedLoopRampRate(rate);
-    this.m_rightLeader.setClosedLoopRampRate(rate);
-  }
-  
-  /**
-   * Sets the idle mode for all motor controllers in the drive subsystem.
-   * @param mode Idle mode (coast or brake).
-   */
-  public void setIdleMode(IdleMode mode) {
-		m_leftLeader.setIdleMode(mode);
-		m_leftFollower.setIdleMode(mode);
-		m_rightLeader.setIdleMode(mode);
-		m_rightFollower.setIdleMode(mode);
-	}
 
   /**
    * Gets the distance traveled by the left motors, in inches.
@@ -126,11 +93,19 @@ public class DriveSubsystem extends SubsystemBase {
     return m_rightEncoder.getPosition();
   }
 
-  /**
-   * Stops the drive subsystem motors.
+   /**
+   * This command resets the left and right Encoders
+   * 
+   * @return a runOnce
    */
-  public void stop() {
-    m_diffDrive.tankDrive(0, 0);
+  public CommandBase resetEncoders() {
+    // Inline construction of command goes here.
+    // Subsystem::RunOnce implicitly requires `this` subsystem.
+    return runOnce(
+        () -> {
+            m_leftEncoder.setPosition(0.0);
+            m_rightEncoder.setPosition(0.0);
+        });
   }
 
   /**
@@ -149,29 +124,15 @@ public class DriveSubsystem extends SubsystemBase {
     m_diffDrive.arcadeDrive(forwardSpeed, rotation);
   }
   
-  /**
-   * Controls the drive subsystem via arcade drive, with an additional scaling of the forward speed
-   * provided by a throttle. 
-   * The calculated values are squared to decrease sensitivity at low speeds. 
-   * @param forwardSpeed The robot's speed along the X axis. Forward is positive.
-   * @param rotation The robot's rotation around the Z axis. Clockwise is positive.
-   * @param throttle Scale factor for the forward speed provided by a throttle control (-1.0 to 1.0)
-   */
-  public void arcadeDriveWithThrottle(double forwardSpeed, double rotation, double throttle) {
-    
-    forwardSpeed = applyLinearConstraints(forwardSpeed);
-    rotation = applyAngularConstraints(rotation);
-
-    // re-scale throttle value to be from 0 to 100%
-    throttle = (throttle + 1)/ 2;
-
-    final double kTurnThrottleRatio = 0.85;
-    forwardSpeed *= throttle;
-    rotation *= throttle * kTurnThrottleRatio;
-
-    m_diffDrive.arcadeDrive(forwardSpeed, rotation);
+  public void stop() {
+    m_diffDrive.tankDrive(0, 0);
   }
-
+  
+  /**
+   * Makes sure that the motor will run forward and backwards with the imput you have given.
+   * @param forwardSpeed
+   * @return the constrainted forwardSpeed
+   */
   private double applyLinearConstraints(double forwardSpeed) {
     double result = forwardSpeed;
 
@@ -194,7 +155,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     return result;
   }
-
+  /**
+   * Makes sure that the motor will run correctly with the imput you have given so you may rotate the robot.
+   * @param forwardSpeed
+   * @return the constrainted forwardSpeed
+   */
   private double applyAngularConstraints(double rotation) {
 
     double result = rotation;
@@ -239,20 +204,21 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Collision Detected Y", collisionDetectedY);
   }
 
-  /**
-   * Controls the drive subsystem via tank drive.
-   * The calculated values are squared to decrease sensitivity at low speeds. 
-   * @param leftSpeed The robot's left side speed along the X axis (-1.0 to 1.0). Forward is positive.
-   * @param rightSpeed The robot's right side speed along the X axis (-1.0 to 1.0). Forward is positive.
-   */
-  public void tankDrive(double leftSpeed, double rightSpeed) {
-    leftSpeed = applyLinearConstraints(leftSpeed);
-    rightSpeed = applyLinearConstraints(rightSpeed);
-
-    m_diffDrive.tankDrive(leftSpeed, rightSpeed);
+  public void setClosedLoopRampRate(double rate) {
+    this.m_leftLeader.setClosedLoopRampRate(rate);
+    this.m_rightLeader.setClosedLoopRampRate(rate);
   }
-
-
+  
+  /**
+   * Sets the idle mode for all motor controllers in the drive subsystem.
+   * @param mode Idle mode (coast or brake).
+   */
+  public void setIdleMode(IdleMode mode) {
+		m_leftLeader.setIdleMode(mode);
+		m_leftFollower.setIdleMode(mode);
+		m_rightLeader.setIdleMode(mode);
+		m_rightFollower.setIdleMode(mode);
+	}
 
   @Override
   public void periodic() {

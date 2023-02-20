@@ -1,14 +1,11 @@
 package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.revrobotics.*;
-import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import static frc.robot.Constants.*;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class ArmSubsystem extends SubsystemBase {
@@ -45,13 +42,12 @@ public class ArmSubsystem extends SubsystemBase {
             });
       }
     
-      @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
-  }
 
-
+  /**
+   * Makes sure that the motor will run with the imput you have given.
+   * @param forwardSpeed
+   * @return the constrainted forwardSpeed
+   */
   private double applyLinearConstraints(double forwardSpeed) {
     double result = forwardSpeed;
 
@@ -75,12 +71,13 @@ public class ArmSubsystem extends SubsystemBase {
     return result;
   }
 
-
-  public void stop() {
-
-    m_armMotor.set(0.0);
-  }
-
+  /**
+   * ArmGo applies linear constraints which is a method that
+   * "does math to limit the motor and make sure you don't screw up"
+   * to the imputed forwardSpeed variable.
+   * It then sets m_armMotor to this speed.
+   * @param forwardSpeed
+   **/
   public void ArmGo(double forwardSpeed) {
 
     forwardSpeed = applyLinearConstraints(forwardSpeed);
@@ -88,8 +85,20 @@ public class ArmSubsystem extends SubsystemBase {
     m_armMotor.set(forwardSpeed);
   }
 
-  
-  
+  /**
+   * Sets m_armMotor speed to zero
+   */
+  public void stop() {
+
+    m_armMotor.set(0.0);
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
+  }
+
 
   // public Command ArmForward(double speed) {
   //   return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});
