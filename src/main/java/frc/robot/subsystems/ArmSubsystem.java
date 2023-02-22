@@ -16,7 +16,7 @@ public class ArmSubsystem extends SubsystemBase {
     private final double kScaleFactor = 0.5;
     
     //Defineing the arm encoder
-    private RelativeEncoder m_armEncoder;
+    public RelativeEncoder m_armEncoder;
     
     public ArmSubsystem() {
         m_armMotor = new CANSparkMax(RoboRio.CanID.kArmControler, MotorType.kBrushless);
@@ -85,6 +85,15 @@ public class ArmSubsystem extends SubsystemBase {
     m_armMotor.set(forwardSpeed);
   }
 
+  public void ArmGoEncoder(double speed) {
+
+    speed = applyLinearConstraints(speed);
+    if ( m_armEncoder.getPosition() < 10000) {
+       m_armMotor.set(speed);}
+    else
+      m_armMotor.set(0);
+  }
+  
   /**
    * Sets m_armMotor speed to zero
    */
@@ -97,6 +106,7 @@ public class ArmSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
+    SmartDashboard.putNumber("Arm Encoder",m_armEncoder.getPosition());
   }
 
 

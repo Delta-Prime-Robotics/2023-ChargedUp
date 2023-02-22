@@ -23,6 +23,7 @@ import frc.robot.Constants.Laptop;
 import frc.robot.commands.ArmMoveCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.OpenIntakeCommand;
 import frc.robot.commands.ScaledArcadeDriveCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -67,6 +68,7 @@ public class RobotContainer {
     m_ArmSubsystem = new ArmSubsystem();
     m_IntakeSubsystem = new IntakeSubsystem();
     
+    
 
     //m_sensorArray = new SensorArraySubsystem();
     //m_pcmCompressor = new Compressor(0, CanID.kLeftLeader);
@@ -107,13 +109,13 @@ public class RobotContainer {
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
     if (m_IntakeSubsystem != null && m_gamePad != null) {
       new JoystickButton(m_gamePad, GamePad.Button.kA)
-        .whileTrue(m_IntakeSubsystem.IntakeGo(0.8))
-        .onFalse(m_IntakeSubsystem.IntakeGo(0))
+        .whileTrue(m_IntakeSubsystem.IntakeMove(0.8))
+        .onFalse(m_IntakeSubsystem.IntakeMove(0))
       ;
 
       new JoystickButton(m_gamePad, GamePad.Button.kB)
-        .whileTrue(m_IntakeSubsystem.IntakeGo(-0.4))
-        .onFalse(m_IntakeSubsystem.IntakeGo(0))
+        .whileTrue(m_IntakeSubsystem.IntakeMove(-0.4))
+        .onFalse(m_IntakeSubsystem.IntakeMove(0))
         ;}
         
        }
@@ -140,7 +142,7 @@ public class RobotContainer {
     if (m_driveSubsystem != null) {
       m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem));
 
-      m_autonomousChooser.addOption("Drop and Go", Autos.dropAndGo(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
+      m_autonomousChooser.addOption("Drop and Go", Autos.dropAndBackUp(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 
       m_autonomousChooser.addOption("Drop and Dock", Autos.dropAndCharge(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
     }
@@ -149,7 +151,6 @@ public class RobotContainer {
     
     SmartDashboard.putData("Autonomous", m_autonomousChooser);
   }
-  
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *

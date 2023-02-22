@@ -38,16 +38,46 @@ public class IntakeSubsystem extends SubsystemBase {
   public CommandBase resetEncoders() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
+    return run(
         () -> {
             m_intakeEncoder.setPosition(0.0);
         });
+  }
+
+    /**
+   * Makes sure that the motor will run with the imput you have given.
+   * @param forwardSpeed
+   * @return the constrainted forwardSpeed
+   */
+  private double applyLinearConstraints(double forwardSpeed) {
+    double result = forwardSpeed;
+
+    final double kDeadzone = 0.05;
+    final double kMinNeededToMove = 0.1;
+    final double kSpeedLimit = 0.8;       // This should be a value <= 1.0
+
+    double absSpeed = Math.abs(forwardSpeed);
+
+    if (absSpeed < kDeadzone) {
+      result = 0.0;
+    }
+    else if (absSpeed < kMinNeededToMove) {
+      result = 0.1 * (forwardSpeed/Math.abs(forwardSpeed));
+    }
+    else if (absSpeed > kSpeedLimit)
+    {
+      result = kSpeedLimit * (forwardSpeed/Math.abs(forwardSpeed));
+    }
+
+    return result;
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Intake Motor Speed", m_intakeMotor.get());
+    SmartDashboard.putString("New Reminder \n Everything is under control", "True");
+
   }
 
 
@@ -56,18 +86,34 @@ public class IntakeSubsystem extends SubsystemBase {
    * @param speed
    * @return a run command
    */
-  public CommandBase IntakeGo(double speed) {
-    return run(
-    () -> {
-      double intakeSpeed = speed;
-      if (intakeSpeed > -1) {
-        intakeSpeed = -1;
-      }
-      else if (intakeSpeed > 1){
-        intakeSpeed = 1;
-      }
-      m_intakeMotor.set(speed * kScaleFactor);
-
-    });
+  public CommandBase IntakeMove(double speed) {
+      return run(
+      () -> {
+        double intakeSpeed = speed;
+        if (intakeSpeed > -1) {
+          intakeSpeed = -1;
+        }
+        else if (intakeSpeed < 1){
+          intakeSpeed = 1;
+        }
+        m_intakeMotor.set(speed * kScaleFactor);
+      });
   }
+
+  public void IntakeGo(double speed) {
+
+    speed = applyLinearConstraints(speed);
+
+    m_intakeMotor.set(speed);
+  }
+
+  public void IntakeGoEncoder(double speed) {
+
+    speed = applyLinearConstraints(speed);
+    if ( m_intakeEncoder.getPosition() < 10000) {
+       m_intakeMotor.set(speed);}
+    else
+      m_intakeMotor.set(0);
+  }
+  
 }
