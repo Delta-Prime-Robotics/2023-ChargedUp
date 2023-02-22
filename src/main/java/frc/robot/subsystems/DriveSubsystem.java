@@ -128,6 +128,9 @@ public class DriveSubsystem extends SubsystemBase {
     m_diffDrive.tankDrive(0, 0);
   }
   
+  public void start(){
+    m_diffDrive.tankDrive(0.5,0.5);
+  }
   /**
    * Makes sure that the motor will run forward and backwards with the imput you have given.
    * @param forwardSpeed

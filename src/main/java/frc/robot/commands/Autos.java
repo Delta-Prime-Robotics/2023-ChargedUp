@@ -12,9 +12,9 @@ import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import 
-
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public final class Autos {
+  
   private static final double kBackupSpeed = 0.5;
   private static final double kBackupDuration = 2.5; // seconds
 
@@ -26,11 +26,13 @@ public final class Autos {
     // Backup 11' 5" plus half the length of the robot. Aim for ~12'
     return new ParallelDeadlineGroup(
       new WaitCommand(kBackupDuration),
-      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0), drive)
+      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+      
+
     );
   }
 
-  public static CommandBase justDock(DriveSubsystem drive) {
+  public static CommandBase justCharge(DriveSubsystem drive) {
     // Use vision to determine if we're far enough?
     // Or use distance, but the wheels might slip on the charge station
     // Backup 8' 2.5" minus half the length of the robot. Approx 70"  
@@ -45,17 +47,18 @@ public final class Autos {
     // Build a sequential command
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
-    //sequence.addCommands(arm.raiseToTier1Command());
-    //sequence.andThen(intake.openCommand());
-
-    sequence.andThen(justBackup(drive));
+    // sequence.addCommands(arm.raiseToTier1Command());
+    // sequence.andThen(intake.openCommand());
+    //sequence.andThen(justBackup(drive));
+    sequence.addCommands(justBackup(drive));
+    
 
     return sequence;
   }
 
-  public static CommandBase dropAndDock(DriveSubsystem drive, ArmSubsystem arm, IntakeSubsystem intake) {
+  public static CommandBase dropAndCharge(DriveSubsystem drive, ArmSubsystem arm, IntakeSubsystem intake) {
     if (arm == null || intake == null) {
-      return justDock(drive);
+      return justCharge(drive);
     }
 
     // Build a sequential command
@@ -63,8 +66,8 @@ public final class Autos {
 
     //sequence.addCommands(arm.raiseToMiddleRowCommand());
     //sequence.andThen(intake.openCommand());
-
-    sequence.andThen(justDock(drive));
+    //sequence.andThen(justDock(drive));
+    //sequence.addCommands(justDock(drive));
 
     return sequence;
   }

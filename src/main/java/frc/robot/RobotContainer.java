@@ -142,10 +142,10 @@ public class RobotContainer {
 
       m_autonomousChooser.addOption("Drop and Go", Autos.dropAndGo(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 
-      m_autonomousChooser.addOption("Drop and Dock", Autos.dropAndDock(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
+      m_autonomousChooser.addOption("Drop and Dock", Autos.dropAndCharge(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
     }
     
-    m_autonomousChooser.addOption("Do Nothing", Autos.doNothing());
+    m_autonomousChooser.setDefaultOption("Do Nothing", Autos.doNothing());
     
     SmartDashboard.putData("Autonomous", m_autonomousChooser);
   }
@@ -157,6 +157,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
+    
     return m_autonomousChooser.getSelected();
   }
 }
