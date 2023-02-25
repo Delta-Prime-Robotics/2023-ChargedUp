@@ -27,19 +27,28 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 public final class Autos {
   
-  private static final double kBackupSpeed = 0.5;
-  private static final double kBackupDuration = 2.5; // seconds
+  private static final double kBackupSpeed =  -0.5;
+  private static final double kBackupDuration = 2; // seconds
   private static final double kOpenIntakeSpeed = 0.5;
   private static final double kOpenIntakeDuration = 2;
  
   public static CommandBase doNothing() {
     return null;
   }
+  public final static Boolean driveEncoderSupplier(DriveSubsystem drive) {
+    
+    if (drive.m_rightEncoder.getPosition() > SmartDashboard.getNumber("Driver Encoder", 500)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
 
-  public static CommandBase justBackup(DriveSubsystem drive) {
+  public static CommandBase justBackup(DriveSubsystem drive, BooleanSupplier driveEncoderSupplier) {
     // Backup 11' 5" plus half the length of the robot. Aim for ~12'
     return new ParallelDeadlineGroup(
-      new WaitCommand(kBackupDuration),
+      new WaitUntilCommand(driveEncoderSupplier),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
       
 
@@ -115,7 +124,7 @@ public final class Autos {
     sequence.addCommands(armStop(arm));
     sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake)));
     sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(justBackup(drive));
+    sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive)));
     
 
     return sequence;

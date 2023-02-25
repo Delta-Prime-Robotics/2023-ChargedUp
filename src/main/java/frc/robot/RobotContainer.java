@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.util.concurrent.PriorityBlockingQueue;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
@@ -23,6 +24,7 @@ import frc.robot.Constants.Laptop;
 import frc.robot.commands.ArmMoveCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.IntakeMoveCommand;
 import frc.robot.commands.ScaledArcadeDriveCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -67,7 +69,7 @@ public class RobotContainer {
     m_ArmSubsystem = new ArmSubsystem();
     m_IntakeSubsystem = new IntakeSubsystem();
     
-    
+    SmartDashboard.putNumber("Driver Encoder", 500);
 
     //m_sensorArray = new SensorArraySubsystem();
     //m_pcmCompressor = new Compressor(0, CanID.kLeftLeader);
@@ -76,7 +78,7 @@ public class RobotContainer {
     m_gamePad = new Joystick(Laptop.UsbPort.kGamePad);
     m_Joystick = new Joystick(Laptop.UsbPort.kFlightJoystick);
     // Cameras (comment out to exclude a camera from the robot);
-    //m_camera1 = CameraServer.startAutomaticCapture(0);
+    m_camera1 = CameraServer.startAutomaticCapture(0);
     if (m_camera1 != null) {
       m_camera1.setResolution(320, 240);
     }
@@ -106,18 +108,18 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-    if (m_IntakeSubsystem != null && m_gamePad != null) {
-      new JoystickButton(m_gamePad, GamePad.Button.kA)
-        .whileTrue(m_IntakeSubsystem.IntakeMove(0.8))
-        .onFalse(m_IntakeSubsystem.IntakeMove(0))
-      ;
+    // if (m_IntakeSubsystem != null && m_gamePad != null) {
+    //   new JoystickButton(m_gamePad, GamePad.Button.kA)
+    //     .whileTrue(m_IntakeSubsystem.IntakeMove(0.8))
+    //     .onFalse(m_IntakeSubsystem.IntakeMove(0))
+    //   ;
 
-      new JoystickButton(m_gamePad, GamePad.Button.kB)
-        .whileTrue(m_IntakeSubsystem.IntakeMove(-0.4))
-        .onFalse(m_IntakeSubsystem.IntakeMove(0))
-        ;}
+    //   new JoystickButton(m_gamePad, GamePad.Button.kB)
+    //     .whileTrue(m_IntakeSubsystem.IntakeMove(-0.8))
+    //     .onFalse(m_IntakeSubsystem.IntakeMove(0))
+    //     ;}
         
-       }
+    }
 
     
   
@@ -125,21 +127,29 @@ public class RobotContainer {
 
     if (m_driveSubsystem != null && m_Joystick != null) {
       m_driveSubsystem.setDefaultCommand(new ScaledArcadeDriveCommand(m_driveSubsystem, 
-        () -> -m_Joystick.getRawAxis(FlightStick.Axis.kFwdBack)* 0.75, 
-        () -> m_Joystick.getRawAxis(FlightStick.Axis.kRotate) * 0.75
+        () -> -m_Joystick.getRawAxis(FlightStick.Axis.kFwdBack), 
+        () -> -m_Joystick.getRawAxis(FlightStick.Axis.kRotate) * 0.75
       ));
     }
 
     if (m_ArmSubsystem != null && m_gamePad != null) {
       m_ArmSubsystem.setDefaultCommand(new ArmMoveCommand(m_ArmSubsystem, 
-      () -> m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown)));
+      () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) *0.75
+      ));
     }
+
+    if (m_IntakeSubsystem != null && m_gamePad != null) {
+      m_IntakeSubsystem.setDefaultCommand(new IntakeMoveCommand(m_IntakeSubsystem, 
+      () -> -m_gamePad.getRawAxis(GamePad.RightStick.kUpDown) *0.75
+      ));
+    }
+
 
   }
   
   private void configureAutonomousChooser() {
     if (m_driveSubsystem != null) {
-      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem));
+      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem)));
 
       m_autonomousChooser.addOption("Drop and Go", Autos.dropAndBackUp(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 

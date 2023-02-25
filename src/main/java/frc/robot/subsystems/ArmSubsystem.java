@@ -25,7 +25,7 @@ public class ArmSubsystem extends SubsystemBase {
         
         m_armEncoder.setPositionConversionFactor(0);
 
-        m_armMotor.setSmartCurrentLimit(30, 90, 10);
+        //m_armMotor.setSmartCurrentLimit(30, 90, 10);
     }
     
      /**

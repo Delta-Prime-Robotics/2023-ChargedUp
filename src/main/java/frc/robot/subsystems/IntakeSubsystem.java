@@ -27,7 +27,7 @@ public class IntakeSubsystem extends SubsystemBase {
         // Need  value for Intake Encoder in Constents
         m_intakeEncoder.setPositionConversionFactor(1);
 
-        m_intakeMotor.setSmartCurrentLimit(30, 90, 10);
+        //m_intakeMotor.setSmartCurrentLimit(30, 90, 10);
     }
 
     /**
@@ -68,7 +68,7 @@ public class IntakeSubsystem extends SubsystemBase {
     {
       result = kSpeedLimit * (forwardSpeed/Math.abs(forwardSpeed));
     }
-
+    SmartDashboard.putNumber("right Stick", forwardSpeed);
     return result;
   }
 
@@ -77,6 +77,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Intake Motor Speed", m_intakeMotor.get());
     SmartDashboard.putString("New Reminder \n Everything is under control", "True");
+    
 
   }
 

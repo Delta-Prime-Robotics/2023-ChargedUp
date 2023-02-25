@@ -38,7 +38,7 @@ public class DriveSubsystem extends SubsystemBase {
     private DifferentialDrive m_diffDrive;
 
     private RelativeEncoder m_leftEncoder;
-    private RelativeEncoder m_rightEncoder;
+    public RelativeEncoder m_rightEncoder;
 
     private AHRS m_navx; // The NavX IMU (gyro)
 
