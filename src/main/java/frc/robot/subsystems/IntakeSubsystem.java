@@ -14,7 +14,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private CANSparkMax m_intakeMotor;
 
     //Defiding the intake encoder
-    private RelativeEncoder m_intakeEncoder;
+    public RelativeEncoder m_intakeEncoder;
 
     //Intake speed scale factor
     private final double kScaleFactor = 0.5;
@@ -38,7 +38,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public CommandBase resetEncoders() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return run(
+    return runOnce(
         () -> {
             m_intakeEncoder.setPosition(0.0);
         });

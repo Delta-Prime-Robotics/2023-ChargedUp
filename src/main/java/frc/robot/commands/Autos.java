@@ -7,16 +7,23 @@ package frc.robot.commands;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+
+import java.util.function.BooleanSupplier;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 public final class Autos {
   
@@ -24,8 +31,6 @@ public final class Autos {
   private static final double kBackupDuration = 2.5; // seconds
   private static final double kOpenIntakeSpeed = 0.5;
   private static final double kOpenIntakeDuration = 2;
- 
- 
  
   public static CommandBase doNothing() {
     return null;
@@ -40,23 +45,6 @@ public final class Autos {
 
     );
   }
-
-  public static CommandBase openIntake(IntakeSubsystem intake) {
-    return new ParallelDeadlineGroup(
-      new WaitCommand(2),
-      new RunCommand(() -> intake.IntakeGo(kOpenIntakeSpeed), intake)
-      
-      
-    );
-  }
-
-  public static CommandBase openIntakeStop(IntakeSubsystem intake) {
-    return new ParallelDeadlineGroup(
-      new WaitCommand(3),
-      new RunCommand(() -> intake.IntakeGo(0), intake)
-    );
-  }
-
   public static CommandBase justCharge(DriveSubsystem drive) {
     // Use vision to determine if we're far enough?
     // Or use distance, but the wheels might slip on the charge station
@@ -64,26 +52,50 @@ public final class Autos {
     return null;
   }
 
-  public static CommandBase armMove(ArmSubsystem arm) {
+  private final static boolean intakeEncoderSupplier(IntakeSubsystem intake) {
+    SmartDashboard.putNumber("Intake Encoder",intake.m_intakeEncoder.getPosition());
+    if (intake.m_intakeEncoder.getPosition() > 100) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
+
+  public static CommandBase intakeMove(IntakeSubsystem intake, BooleanSupplier intakeEncoderSupplier) {
     return new ParallelDeadlineGroup(
-      new WaitCommand(2),
-      new RunCommand(() -> arm.ArmGo(0.5), arm)
+      new WaitUntilCommand(intakeEncoderSupplier),
+      new RunCommand(()-> intake.IntakeGo(0.5), intake)
+    );
+  }
+
+  public static CommandBase intakeStop(IntakeSubsystem intake) {
+    return new InstantCommand(() -> intake.IntakeGo(0), intake);
+  }
+
+ 
+  private final static boolean armEncoderSupplier(ArmSubsystem arm) {
+    SmartDashboard.putNumber("Arm Encoder",arm.m_armEncoder.getPosition());
+    if (arm.m_armEncoder.getPosition() > 100) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
+
+  public static CommandBase armMove(ArmSubsystem arm, BooleanSupplier armEncoderSupplier) {
+    return new ParallelDeadlineGroup(
+      new WaitUntilCommand(armEncoderSupplier),
+      new RunCommand(()-> arm.ArmGo(0.5), arm)
     );
   }
 
   public static CommandBase armStop(ArmSubsystem arm) {
-    return new ParallelDeadlineGroup(
-      new WaitCommand(2), 
-      new RunCommand(() -> arm.ArmGo(0), arm)
-    );
+    return new InstantCommand(() -> arm.ArmGo(0), arm);
+    
   }
 
-  public static CommandBase armEncoder(ArmSubsystem arm) {
-    return new ParallelDeadlineGroup(
-      new WaitCommand(0),
-      new RunCommand(() -> arm.resetEncoders(), arm)
-    );
-  }
   public static CommandBase dropAndBackUp(DriveSubsystem drive, ArmSubsystem arm, IntakeSubsystem intake) {
     // if (arm == null || intake == null) {
     //   return justBackup(drive);
@@ -96,11 +108,13 @@ public final class Autos {
     //Then BackUp
     // sequence.addCommands(arm.raiseToTier1Command());
     // sequence.andThen(intake.openCommand());
-    //sequence.andThen(justBackup(drive));
-    sequence.addCommands(armMove(arm));
+    //sequence.andThen(justBackup(drive));\
+    sequence.addCommands(arm.resetEncoders());
+    sequence.addCommands(intake.resetEncoders());
+    sequence.addCommands(armMove(arm, () -> armEncoderSupplier(arm) ));
     sequence.addCommands(armStop(arm));
-    sequence.addCommands(openIntake(intake));
-    sequence.addCommands(openIntakeStop(intake));
+    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake)));
+    sequence.addCommands(intakeStop(intake));
     sequence.addCommands(justBackup(drive));
     
 

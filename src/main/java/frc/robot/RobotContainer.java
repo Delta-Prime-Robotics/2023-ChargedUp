@@ -23,7 +23,6 @@ import frc.robot.Constants.Laptop;
 import frc.robot.commands.ArmMoveCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.OpenIntakeCommand;
 import frc.robot.commands.ScaledArcadeDriveCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
