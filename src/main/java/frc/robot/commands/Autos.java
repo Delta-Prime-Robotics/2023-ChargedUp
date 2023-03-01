@@ -31,13 +31,17 @@ public final class Autos {
   private static final double kBackupDuration = 2; // seconds
   private static final double kOpenIntakeSpeed = 0.5;
   private static final double kOpenIntakeDuration = 2;
- 
+  public static final double kBackupEncoder = SmartDashboard.getNumber("Driver Encoder", 500);
+  private static final double kOpenArmEncoder = SmartDashboard.getNumber("Open Arm Encoder", 100);
+  private static final double kOpenIntakeEncoder = SmartDashboard.getNumber("Open Intake Encoder", 100);
+
   public static CommandBase doNothing() {
     return null;
   }
-  public final static Boolean driveEncoderSupplier(DriveSubsystem drive) {
+  
+  public final static Boolean driveEncoderSupplier(DriveSubsystem drive, double encodervalue) {
     
-    if (drive.m_rightEncoder.getPosition() > SmartDashboard.getNumber("Driver Encoder", 500)) {
+    if (drive.m_rightEncoder.getPosition() > encodervalue) {
       return true;
     }
     else {
@@ -61,9 +65,9 @@ public final class Autos {
     return null;
   }
 
-  private final static boolean intakeEncoderSupplier(IntakeSubsystem intake) {
+  private final static boolean intakeEncoderSupplier(IntakeSubsystem intake, double encodervalue) {
     SmartDashboard.putNumber("Intake Encoder",intake.m_intakeEncoder.getPosition());
-    if (intake.m_intakeEncoder.getPosition() > 100) {
+    if (intake.m_intakeEncoder.getPosition() > encodervalue) {
       return true;
     }
     else {
@@ -83,9 +87,9 @@ public final class Autos {
   }
 
  
-  private final static boolean armEncoderSupplier(ArmSubsystem arm) {
+  private final static boolean armEncoderSupplier(ArmSubsystem arm, double encodervalue) {
     SmartDashboard.putNumber("Arm Encoder",arm.m_armEncoder.getPosition());
-    if (arm.m_armEncoder.getPosition() > 100) {
+    if (arm.m_armEncoder.getPosition() > encodervalue) {
       return true;
     }
     else {
@@ -120,11 +124,11 @@ public final class Autos {
     //sequence.andThen(justBackup(drive));\
     sequence.addCommands(arm.resetEncoders());
     sequence.addCommands(intake.resetEncoders());
-    sequence.addCommands(armMove(arm, () -> armEncoderSupplier(arm) ));
+    sequence.addCommands(armMove(arm, () -> armEncoderSupplier(arm, kOpenArmEncoder) ));
     sequence.addCommands(armStop(arm));
-    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake)));
+    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake, kOpenIntakeEncoder)));
     sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive)));
+    sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive, kBackupEncoder)));
     
 
     return sequence;

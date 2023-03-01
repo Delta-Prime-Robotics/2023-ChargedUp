@@ -7,7 +7,10 @@ package frc.robot;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -54,7 +57,7 @@ public class RobotContainer {
   private Joystick m_Joystick = null;
   
   // Cameras
-  private UsbCamera m_camera1;
+  private UsbCamera m_camera1 = CameraServer.startAutomaticCapture(0);
 
   //private PhotonCamera m_photonCamera;
 
@@ -70,7 +73,8 @@ public class RobotContainer {
     m_IntakeSubsystem = new IntakeSubsystem();
     
     SmartDashboard.putNumber("Driver Encoder", 500);
-
+    SmartDashboard.putNumber("Open Arm Encoder", 100);
+    SmartDashboard.putNumber("Open Intake Encoder", 100);
     //m_sensorArray = new SensorArraySubsystem();
     //m_pcmCompressor = new Compressor(0, CanID.kLeftLeader);
    // m_exampleSolenoidPCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
@@ -78,11 +82,10 @@ public class RobotContainer {
     m_gamePad = new Joystick(Laptop.UsbPort.kGamePad);
     m_Joystick = new Joystick(Laptop.UsbPort.kFlightJoystick);
     // Cameras (comment out to exclude a camera from the robot);
-    m_camera1 = CameraServer.startAutomaticCapture(0);
     if (m_camera1 != null) {
       m_camera1.setResolution(320, 240);
+      CameraServer.putVideo(null, 320, 240);
     }
-
    // m_photonCamera = new PhotonCamera("photonvision/Microsoft_LifeCam_HD-3000");
 
     // Configure the trigger bindings
@@ -149,7 +152,7 @@ public class RobotContainer {
   
   private void configureAutonomousChooser() {
     if (m_driveSubsystem != null) {
-      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem)));
+      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem,Autos.kBackupEncoder)));
 
       m_autonomousChooser.addOption("Drop and Go", Autos.dropAndBackUp(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 
