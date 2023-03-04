@@ -11,7 +11,7 @@ import frc.robot.subsystems.ArmSubsystem;
 
 public class ArmMoveCommand extends CommandBase {
   
-  private static final double kForwardScaleFactor = 0.80;
+  private static final double kForwardScaleFactor = 1.0;
  
   private final ArmSubsystem m_armSubsystem;
   private final DoubleSupplier m_forwardSpeedSupplier;

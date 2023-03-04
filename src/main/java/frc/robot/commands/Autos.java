@@ -28,11 +28,11 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 public final class Autos {
   
   private static final double kBackupSpeed =  -0.5;
-  private static final double kBackupDuration = 2; // seconds
+  private static final double kBackupDuration = 3; // seconds
   private static final double kOpenIntakeSpeed = 0.5;
   private static final double kOpenIntakeDuration = 2;
   public static final double kJustBackUpEncoder = 500;
-  private static final double kArmRaiseMid = 100;
+  private static final double kArmRaiseMid = -100;
   private static final double kIntakeOpen = 100;
   public static CommandBase doNothing() {
     return null;
@@ -50,7 +50,7 @@ public final class Autos {
   public static CommandBase justBackup(DriveSubsystem drive, BooleanSupplier driveEncoderSupplier) {
     // Backup 11' 5" plus half the length of the robot. Aim for ~12'
     return new ParallelDeadlineGroup(
-      new WaitUntilCommand(driveEncoderSupplier),
+      new WaitCommand(kBackupDuration),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
       
 
@@ -75,11 +75,17 @@ public final class Autos {
 
   public static CommandBase intakeMove(IntakeSubsystem intake, BooleanSupplier intakeEncoderSupplier) {
     return new ParallelDeadlineGroup(
-      new WaitUntilCommand(intakeEncoderSupplier),
-      new RunCommand(()-> intake.IntakeGo(0.5), intake)
+      new WaitCommand(0.8),
+      new RunCommand(()-> intake.IntakeGo(-0.5), intake)
     );
   }
 
+  public static CommandBase intakeBack(IntakeSubsystem intake, BooleanSupplier intakeEncoderSupplier) {
+    return new ParallelDeadlineGroup(
+      new WaitCommand(0.8),
+      new RunCommand(()-> intake.IntakeGo(0.5), intake)
+    );
+  }
   public static CommandBase intakeStop(IntakeSubsystem intake) {
     return new InstantCommand(() -> intake.IntakeGo(0), intake);
   }
@@ -95,9 +101,16 @@ public final class Autos {
     }
   };
 
-  public static CommandBase armMove(ArmSubsystem arm, BooleanSupplier armEncoderSupplier) {
+  public static CommandBase armforward(ArmSubsystem arm, BooleanSupplier armEncoderSupplier) {
     return new ParallelDeadlineGroup(
-      new WaitUntilCommand(armEncoderSupplier),
+      new WaitCommand(2),
+      new RunCommand(()-> arm.ArmGo(-0.5), arm)
+    );
+  }
+
+  public static CommandBase armback(ArmSubsystem arm, BooleanSupplier armEncoderSupplier) {
+    return new ParallelDeadlineGroup(
+      new WaitCommand(1.8),
       new RunCommand(()-> arm.ArmGo(0.5), arm)
     );
   }
@@ -122,17 +135,37 @@ public final class Autos {
     //sequence.andThen(justBackup(drive));\
     sequence.addCommands(arm.resetEncoders());
     sequence.addCommands(intake.resetEncoders());
-    sequence.addCommands(armMove(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armforward(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
     sequence.addCommands(armStop(arm));
     sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
     sequence.addCommands(intakeStop(intake));
+    sequence.addCommands(intakeBack(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
+    sequence.addCommands(intakeStop(intake));
+    sequence.addCommands(armback(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armStop(arm));
     sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive, kJustBackUpEncoder)));
     
 
     return sequence;
   }
 
-  
+  public static CommandBase dropAndStay(ArmSubsystem arm, IntakeSubsystem intake) {
+    
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+
+    sequence.addCommands(arm.resetEncoders());
+    sequence.addCommands(intake.resetEncoders());
+    sequence.addCommands(armforward(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armStop(arm));
+    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
+    sequence.addCommands(intakeStop(intake));
+    sequence.addCommands(intakeBack(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
+    sequence.addCommands(intakeStop(intake));
+    sequence.addCommands(armback(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armStop(arm));
+
+    return sequence;
+  }
 
   public static CommandBase dropAndCharge(DriveSubsystem drive, ArmSubsystem arm, IntakeSubsystem intake) {
     if (arm == null || intake == null) {

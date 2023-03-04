@@ -12,7 +12,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 
 public class IntakeMoveCommand extends CommandBase {
   
-  private static final double kForwardScaleFactor = 0.80;
+  private static final double kForwardScaleFactor = 1.0;
  
   private final IntakeSubsystem m_IntakeSubsystem;
   private final DoubleSupplier m_forwardSpeedSupplier;

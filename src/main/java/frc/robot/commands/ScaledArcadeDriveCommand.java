@@ -11,8 +11,8 @@ import frc.robot.subsystems.DriveSubsystem;
 
 public class ScaledArcadeDriveCommand extends CommandBase {
   
-  private static final double kForwardScaleFactor = 0.80;
-  private static final double kRotationScaleFactor = 0.70;
+  private static final double kForwardScaleFactor = 1.0;
+  private static final double kRotationScaleFactor = 1.0;
 
   private final DriveSubsystem m_driveSubsystem;
   private final DoubleSupplier m_forwardSpeedSupplier;

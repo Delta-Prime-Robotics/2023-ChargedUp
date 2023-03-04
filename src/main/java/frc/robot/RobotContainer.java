@@ -4,19 +4,13 @@
 
 package frc.robot;
 
-import java.util.concurrent.PriorityBlockingQueue;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FlightStick;
 import frc.robot.Constants.GamePad;
@@ -84,7 +78,7 @@ public class RobotContainer {
       m_camera1.setResolution(320, 240);
     }
 
-    m_camera2 = CameraServer.startAutomaticCapture(0);
+    m_camera2 = CameraServer.startAutomaticCapture(1);
     if (m_camera2 != null) {
       m_camera2.setResolution(320, 240);
     }
@@ -139,13 +133,13 @@ public class RobotContainer {
 
     if (m_ArmSubsystem != null && m_gamePad != null) {
       m_ArmSubsystem.setDefaultCommand(new ArmMoveCommand(m_ArmSubsystem, 
-      () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
+      () -> m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
       ));
     }
 
     if (m_IntakeSubsystem != null && m_gamePad != null) {
       m_IntakeSubsystem.setDefaultCommand(new IntakeMoveCommand(m_IntakeSubsystem, 
-      () -> -m_gamePad.getRawAxis(GamePad.RightStick.kUpDown) 
+      () -> m_gamePad.getRawAxis(GamePad.RightStick.kUpDown) 
       ));
     }
 
@@ -154,13 +148,17 @@ public class RobotContainer {
   
   private void configureAutonomousChooser() {
     if (m_driveSubsystem != null) {
-      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem, Autos.kJustBackUpEncoder)));
+      m_autonomousChooser.addOption("Just Leave",  Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem, Autos.kJustBackUpEncoder)));
 
       m_autonomousChooser.addOption("Drop and Go", Autos.dropAndBackUp(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 
       m_autonomousChooser.addOption("Drop and Dock", Autos.dropAndCharge(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
     }
     
+    if (m_ArmSubsystem != null && m_IntakeSubsystem != null) {
+      m_autonomousChooser.addOption("Drop and Stay", Autos.dropAndStay(m_ArmSubsystem, m_IntakeSubsystem));
+    }
+
     m_autonomousChooser.setDefaultOption("Do Nothing", Autos.doNothing());
     
     SmartDashboard.putData("Autonomous", m_autonomousChooser);
