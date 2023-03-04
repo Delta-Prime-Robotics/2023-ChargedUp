@@ -55,6 +55,7 @@ public class RobotContainer {
   
   // Cameras
   private UsbCamera m_camera1;
+  private UsbCamera m_camera2;
 
   //private PhotonCamera m_photonCamera;
 
@@ -83,6 +84,10 @@ public class RobotContainer {
       m_camera1.setResolution(320, 240);
     }
 
+    m_camera2 = CameraServer.startAutomaticCapture(0);
+    if (m_camera2 != null) {
+      m_camera2.setResolution(320, 240);
+    }
    // m_photonCamera = new PhotonCamera("photonvision/Microsoft_LifeCam_HD-3000");
 
     // Configure the trigger bindings
@@ -134,13 +139,13 @@ public class RobotContainer {
 
     if (m_ArmSubsystem != null && m_gamePad != null) {
       m_ArmSubsystem.setDefaultCommand(new ArmMoveCommand(m_ArmSubsystem, 
-      () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) *0.75
+      () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
       ));
     }
 
     if (m_IntakeSubsystem != null && m_gamePad != null) {
       m_IntakeSubsystem.setDefaultCommand(new IntakeMoveCommand(m_IntakeSubsystem, 
-      () -> -m_gamePad.getRawAxis(GamePad.RightStick.kUpDown) *0.75
+      () -> -m_gamePad.getRawAxis(GamePad.RightStick.kUpDown) 
       ));
     }
 
@@ -149,7 +154,7 @@ public class RobotContainer {
   
   private void configureAutonomousChooser() {
     if (m_driveSubsystem != null) {
-      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem)));
+      m_autonomousChooser.addOption("Just Leave", Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem, Autos.kJustBackUpEncoder)));
 
       m_autonomousChooser.addOption("Drop and Go", Autos.dropAndBackUp(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 
