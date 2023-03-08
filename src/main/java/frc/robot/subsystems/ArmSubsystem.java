@@ -1,4 +1,5 @@
 package frc.robot.subsystems;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -10,18 +11,24 @@ import static frc.robot.Constants.*;
 
 public class ArmSubsystem extends SubsystemBase {
     //defining the spark max arm motor
-    private CANSparkMax m_armMotor;
+    private CANSparkMax m_armLeader;
+    private CANSparkMax m_armFollower;
     
+    private MotorControllerGroup m_MotorControllerGroup;
     //arm speed scale factor
     private final double kScaleFactor = 0.5;
     
     //Defineing the arm encoder
     public RelativeEncoder m_armEncoder;
-    
+   
+   
     public ArmSubsystem() {
-        m_armMotor = new CANSparkMax(RoboRio.CanID.kArmControler, MotorType.kBrushless);
+        m_armLeader = new CANSparkMax(RoboRio.CanID.kArmLeader, MotorType.kBrushless);
+        m_armFollower = new CANSparkMax(RoboRio.CanID.kArmFollower, MotorType.kBrushless);
+        m_MotorControllerGroup = new MotorControllerGroup(m_armLeader, m_armFollower);
+
         // Need  value for Arm Encoder in Constents
-        m_armEncoder = m_armMotor.getEncoder();
+        m_armEncoder = m_armLeader.getEncoder();
         
         m_armEncoder.setPositionConversionFactor(0);
 
@@ -82,30 +89,30 @@ public class ArmSubsystem extends SubsystemBase {
 
     forwardSpeed = applyLinearConstraints(forwardSpeed);
 
-    m_armMotor.set(forwardSpeed);
+    m_MotorControllerGroup.set(forwardSpeed);
   }
 
-  public void ArmGoEncoder(double speed) {
+  // public void ArmGoEncoder(double speed) {
 
-    speed = applyLinearConstraints(speed);
-    if ( m_armEncoder.getPosition() < 10000) {
-       m_armMotor.set(speed);}
-    else
-      m_armMotor.set(0);
-  }
+  //   speed = applyLinearConstraints(speed);
+  //   if ( m_armEncoder.getPosition() < 10000) {
+  //      m_armMotor.set(speed);}
+  //   else
+  //     m_armMotor.set(0);
+  // }
   
   /**
    * Sets m_armMotor speed to zero
    */
   public void stop() {
 
-    m_armMotor.set(0.0);
+    m_MotorControllerGroup.set(0.0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Arm Motor Speed", m_armMotor.get());
+    SmartDashboard.putNumber("Arm Motor Speed", m_armLeader.get());
     
   }
 
