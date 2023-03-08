@@ -147,17 +147,15 @@ public class RobotContainer {
   }
   
   private void configureAutonomousChooser() {
-    if (m_driveSubsystem != null) {
+    
       m_autonomousChooser.addOption("Just Leave",  Autos.justBackup(m_driveSubsystem, () -> Autos.driveEncoderSupplier(m_driveSubsystem, Autos.kJustBackUpEncoder)));
 
       m_autonomousChooser.addOption("Drop and Go", Autos.dropAndBackUp(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 
-      m_autonomousChooser.addOption("Drop and Dock", Autos.dropAndCharge(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
-    }
+      m_autonomousChooser.addOption("Drop and Charge", Autos.dropAndCharge(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
+
+      m_autonomousChooser.addOption("Drop and Stay", Autos.drop(m_ArmSubsystem, m_IntakeSubsystem));
     
-    if (m_ArmSubsystem != null && m_IntakeSubsystem != null) {
-      m_autonomousChooser.addOption("Drop and Stay", Autos.dropAndStay(m_ArmSubsystem, m_IntakeSubsystem));
-    }
 
     m_autonomousChooser.setDefaultOption("Do Nothing", Autos.doNothing());
     

@@ -34,6 +34,8 @@ public final class Autos {
   public static final double kJustBackUpEncoder = 500;
   private static final double kArmRaiseMid = -100;
   private static final double kIntakeOpen = 100;
+  private static final double kChargeDuration = 2.15;
+
   public static CommandBase doNothing() {
     return null;
   }
@@ -56,11 +58,12 @@ public final class Autos {
 
     );
   }
+
   public static CommandBase justCharge(DriveSubsystem drive) {
-    // Use vision to determine if we're far enough?
-    // Or use distance, but the wheels might slip on the charge station
-    // Backup 8' 2.5" minus half the length of the robot. Approx 70"  
-    return null;
+    return new ParallelDeadlineGroup(
+      new WaitCommand(kChargeDuration),
+      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+    );
   }
 
   private final static boolean intakeEncoderSupplier(IntakeSubsystem intake, double encoder) {
@@ -119,6 +122,24 @@ public final class Autos {
     return new InstantCommand(() -> arm.ArmGo(0), arm);
     
   }
+  
+  public static CommandBase drop(ArmSubsystem arm, IntakeSubsystem intake) {
+
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+
+    sequence.addCommands(arm.resetEncoders());
+    sequence.addCommands(intake.resetEncoders());
+    sequence.addCommands(armforward(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armStop(arm));
+    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
+    sequence.addCommands(intakeStop(intake));
+    sequence.addCommands(intakeBack(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
+    sequence.addCommands(intakeStop(intake));
+    sequence.addCommands(armback(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armStop(arm));
+
+    return sequence;
+  }
 
   public static CommandBase dropAndBackUp(DriveSubsystem drive, ArmSubsystem arm, IntakeSubsystem intake) {
     // if (arm == null || intake == null) {
@@ -133,52 +154,21 @@ public final class Autos {
     // sequence.addCommands(arm.raiseToTier1Command());
     // sequence.andThen(intake.openCommand());
     //sequence.andThen(justBackup(drive));\
-    sequence.addCommands(arm.resetEncoders());
-    sequence.addCommands(intake.resetEncoders());
-    sequence.addCommands(armforward(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
-    sequence.addCommands(armStop(arm));
-    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
-    sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(intakeBack(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
-    sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(armback(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
-    sequence.addCommands(armStop(arm));
+    sequence.addCommands(drop(arm, intake));
     sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive, kJustBackUpEncoder)));
     
 
     return sequence;
   }
 
-  public static CommandBase dropAndStay(ArmSubsystem arm, IntakeSubsystem intake) {
-    
-    SequentialCommandGroup sequence = new SequentialCommandGroup();
-
-    sequence.addCommands(arm.resetEncoders());
-    sequence.addCommands(intake.resetEncoders());
-    sequence.addCommands(armforward(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
-    sequence.addCommands(armStop(arm));
-    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
-    sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(intakeBack(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
-    sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(armback(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
-    sequence.addCommands(armStop(arm));
-
-    return sequence;
-  }
-
   public static CommandBase dropAndCharge(DriveSubsystem drive, ArmSubsystem arm, IntakeSubsystem intake) {
-    if (arm == null || intake == null) {
-      return justCharge(drive);
-    }
+    
 
     // Build a sequential command
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
-    //sequence.addCommands(arm.raiseToMiddleRowCommand());
-    //sequence.andThen(intake.openCommand());
-    //sequence.andThen(justDock(drive));
-    //sequence.addCommands(justDock(drive));
+    sequence.addCommands(drop(arm, intake));
+    sequence.addCommands(justCharge(drive));
 
     return sequence;
   }
