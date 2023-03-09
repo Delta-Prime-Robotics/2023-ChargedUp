@@ -64,7 +64,7 @@ public class RobotContainer {
     m_ArmSubsystem = new ArmSubsystem();
     m_IntakeSubsystem = new IntakeSubsystem();
     
-    SmartDashboard.putNumber("Driver Encoder", 500);
+    
 
     //m_sensorArray = new SensorArraySubsystem();
     //m_pcmCompressor = new Compressor(0, CanID.kLeftLeader);

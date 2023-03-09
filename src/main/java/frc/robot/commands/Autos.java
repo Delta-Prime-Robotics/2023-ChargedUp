@@ -30,7 +30,7 @@ public final class Autos {
   private static final double kBackupDuration = 3; // seconds
   private static final double kOpenIntakeSpeed = 0.5;
   private static final double kOpenIntakeDuration = 2;
-  public static final double kJustBackUpEncoder = 500;
+  public static final double kJustBackUpEncoder = -10000;
   private static final double kArmRaiseMid = -100;
   private static final double kIntakeOpen = 100;
   private static final double kChargeDuration = 2.15;
@@ -40,7 +40,7 @@ public final class Autos {
   }
   public final static Boolean driveEncoderSupplier(DriveSubsystem drive, double encoder) {
     
-    if (drive.m_rightEncoder.getPosition() > encoder) {
+    if (Math.abs(drive.m_rightEncoder.getPosition()) > 10000 ) {
       return true;
     }
     else {
@@ -50,8 +50,10 @@ public final class Autos {
 
   public static CommandBase justBackup(DriveSubsystem drive, BooleanSupplier driveEncoderSupplier) {
     // Backup 11' 5" plus half the length of the robot. Aim for ~12'
+    drive.m_leftEncoder.setPosition(0.0);
+    drive.m_rightEncoder.setPosition(0.0);
     return new ParallelDeadlineGroup(
-      new WaitCommand(kBackupDuration),
+      new WaitUntilCommand(driveEncoderSupplier),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
       
 
