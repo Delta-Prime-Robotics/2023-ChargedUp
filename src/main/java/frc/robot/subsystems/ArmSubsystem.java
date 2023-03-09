@@ -25,6 +25,7 @@ public class ArmSubsystem extends SubsystemBase {
     public ArmSubsystem() {
         m_armLeader = new CANSparkMax(RoboRio.CanID.kArmLeader, MotorType.kBrushless);
         m_armFollower = new CANSparkMax(RoboRio.CanID.kArmFollower, MotorType.kBrushless);
+        m_armFollower.setInverted(true);
         m_MotorControllerGroup = new MotorControllerGroup(m_armLeader, m_armFollower);
 
         // Need  value for Arm Encoder in Constents
@@ -60,7 +61,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     final double kDeadzone = 0.05;
     final double kMinNeededToMove = 0.1;
-    final double kSpeedLimit = 1;       // This should be a value <= 1.0
+    final double kSpeedLimit = 0.4;       // This should be a value <= 1.0
 
     double absSpeed = Math.abs(forwardSpeed);
 
