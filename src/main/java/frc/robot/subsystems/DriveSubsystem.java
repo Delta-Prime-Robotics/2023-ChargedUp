@@ -64,9 +64,6 @@ public class DriveSubsystem extends SubsystemBase {
         m_leftEncoder = m_leftLeader.getEncoder();
         m_rightEncoder = m_rightLeader.getEncoder();    
         
-        m_leftEncoder.setPosition(0);
-        m_rightEncoder.setPosition(0);
-        
         m_leftEncoder.setPositionConversionFactor(RobotConfig.kDistancePerRotation);
         m_rightEncoder.setPositionConversionFactor(RobotConfig.kDistancePerRotation);
 
@@ -237,8 +234,7 @@ public class DriveSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("Right Drive Motor Speed", m_rightLeader.get());
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("photonvision/Microsoft_LifeCam_HD-3000");
-    //SmartDashboard.putBoolean("NT-hasTarget", table.getEntry("hasTarget").getBoolean(false));
-    SmartDashboard.putNumber("Drive Encoder", this.getLeftDistance());
+    SmartDashboard.putBoolean("NT-hasTarget", table.getEntry("hasTarget").getBoolean(false));
 
   }
 

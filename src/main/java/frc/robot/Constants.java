@@ -53,9 +53,7 @@ public final class Constants {
         //     public static final double kPitchInRadians = Units.degreesToRadians(0);
         // }
         /* The following is an estimate. We need to confirm with the actual robot and remove this comment. */
-       
-        //public static final double kDistancePerRotation = 2 * Math.PI * 6.0;
-        public static final double kDistancePerRotation = 0;
+        public static final double kDistancePerRotation = 2 * Math.PI * 6.0;
     }
 
     public static final class RobotCharacterization {
