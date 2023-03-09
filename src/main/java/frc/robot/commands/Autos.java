@@ -30,7 +30,7 @@ public final class Autos {
   private static final double kBackupDuration = 3; // seconds
   private static final double kOpenIntakeSpeed = 0.5;
   private static final double kOpenIntakeDuration = 2;
-  public static final double kJustBackUpEncoder = 500;
+  public static final double kJustBackUpEncoder = -100;
   private static final double kArmRaiseMid = -100;
   private static final double kIntakeOpen = 100;
   private static final double kChargeDuration = 2.15;
@@ -39,7 +39,8 @@ public final class Autos {
     return null;
   }
   public final static Boolean driveEncoderSupplier(DriveSubsystem drive, double encoder) {
-    
+    int i =1;
+    SmartDashboard.putNumber("test", encoder);
     if (drive.m_rightEncoder.getPosition() > encoder) {
       return true;
     }
@@ -50,10 +51,12 @@ public final class Autos {
 
   public static CommandBase justBackup(DriveSubsystem drive, BooleanSupplier driveEncoderSupplier) {
     // Backup 11' 5" plus half the length of the robot. Aim for ~12'
+    drive.resetEncoders();
+    SmartDashboard.putNumber("Drive Encoder", drive.getLeftDistance());
+    
     return new ParallelDeadlineGroup(
-      new WaitCommand(kBackupDuration),
-      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
-      
+      new WaitUntilCommand(driveEncoderSupplier),
+      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)  
 
     );
   }
@@ -94,7 +97,6 @@ public final class Autos {
 
  
   private final static boolean armEncoderSupplier(ArmSubsystem arm, double encoder) {
-    SmartDashboard.putNumber("Arm Encoder",arm.m_armEncoder.getPosition());
     if (arm.m_armEncoder.getPosition() > encoder) {
       return true;
     }
