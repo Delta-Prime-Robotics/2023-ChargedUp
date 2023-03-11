@@ -27,10 +27,12 @@ public final class Constants {
             public static final int kUltraSonic = 0;
         }
         public final class CanID {
-            public static final int kLeftLeader = 11;
-            public static final int kLeftFollower = 12;
+            public static final int kLeftLeader = 10;
+            public static final int kLeftMid = 11;
+            public static final int kLeftBack = 12;
             public static final int kRightLeader = 13;
-            public static final int kRightFollower = 14;
+            public static final int kRightMid = 14;
+            public static final int kRightBack = 15;
             public static final int kArmLeader = 19;
             public static final int kArmFollower = 21;
             public static final int kIntakeControler = 20;
@@ -38,7 +40,11 @@ public final class Constants {
             public static final int kPCMcontroller = 1;
         }
     }    
-
+    public static class BalanceState {
+        public static final int kUp = 0;
+        public static final int kDown = 1;
+        public static final int kLevel = 2;
+    }
     // Connections to the Drivers' Station Laptop
     public static final class Laptop {
         public final class UsbPort {

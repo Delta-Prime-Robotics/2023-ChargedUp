@@ -32,16 +32,18 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Drive components
     private CANSparkMax m_leftLeader;
-    private CANSparkMax m_leftFollower;  
+    private CANSparkMax m_leftMid;
+    private CANSparkMax m_leftBack;   
     private CANSparkMax m_rightLeader;
-    private CANSparkMax m_rightFollower;
+    private CANSparkMax m_rightMid;
+    private CANSparkMax m_rightBack;
 
     private DifferentialDrive m_diffDrive;
 
     public RelativeEncoder m_leftEncoder;
     public RelativeEncoder m_rightEncoder;
 
-    private AHRS m_navx; // The NavX IMU (gyro)
+    public AHRS m_navx; // The NavX IMU (gyro)
 
     // Instance variable for collision detection
     private double m_lastLinearAccelY;
@@ -49,12 +51,16 @@ public class DriveSubsystem extends SubsystemBase {
     //**Creates a drive subsystem */
     public DriveSubsystem() {
         m_leftLeader = new CANSparkMax(RoboRio.CanID.kLeftLeader, MotorType.kBrushless);
-        m_leftFollower = new CANSparkMax(RoboRio.CanID.kLeftFollower, MotorType.kBrushless);
+        m_leftMid = new CANSparkMax(RoboRio.CanID.kLeftMid, MotorType.kBrushless);
+        m_leftBack = new CANSparkMax(RoboRio.CanID.kLeftBack, MotorType.kBrushless);
         m_rightLeader = new CANSparkMax(RoboRio.CanID.kRightLeader, MotorType.kBrushless);
-        m_rightFollower = new CANSparkMax(RoboRio.CanID.kRightFollower, MotorType.kBrushless);
+        m_rightMid = new CANSparkMax(RoboRio.CanID.kRightMid, MotorType.kBrushless);
+        m_rightBack = new CANSparkMax(RoboRio.CanID.kRightBack, MotorType.kBrushless);
 
-        m_leftFollower.follow(m_leftLeader);
-        m_rightFollower.follow(m_rightLeader);
+        m_leftMid.follow(m_leftLeader);
+        m_leftBack.follow(m_leftLeader);
+        m_rightMid.follow(m_rightLeader);
+        m_rightBack.follow(m_rightLeader);
 
         m_rightLeader.setInverted(true);
 
@@ -70,7 +76,8 @@ public class DriveSubsystem extends SubsystemBase {
 
         try {
           m_navx = new AHRS(SPI.Port.kMXP);
-          //SmartDashboard.putData(m_navx);
+          m_navx.calibrate();
+          m_navx.reset();
         }
         catch (RuntimeException ex) {
           DriverStation.reportError("Error instantiating navX MSP: " + ex.getMessage(), true);
@@ -219,9 +226,11 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void setIdleMode(IdleMode mode) {
 		m_leftLeader.setIdleMode(mode);
-		m_leftFollower.setIdleMode(mode);
+		m_leftMid.setIdleMode(mode);
+    m_leftBack.setIdleMode(mode);
 		m_rightLeader.setIdleMode(mode);
-		m_rightFollower.setIdleMode(mode);
+		m_rightMid.setIdleMode(mode);
+    m_rightBack.setIdleMode(mode);
 	}
 
   @Override
@@ -237,7 +246,9 @@ public class DriveSubsystem extends SubsystemBase {
     NetworkTable table = inst.getTable("photonvision/Microsoft_LifeCam_HD-3000");
     // SmartDashboard.putBoolean("NT-hasTarget", table.getEntry("hasTarget").getBoolean(false));
     SmartDashboard.putNumber("Driver Encoder" , this.m_rightEncoder.getPosition());
-
+    SmartDashboard.putNumber("Roll", m_navx.getRoll());
+    SmartDashboard.putNumber("Pitch", m_navx.getPitch());
+    SmartDashboard.putNumber("Yaw", m_navx.getYaw());
   }
 
   @Override

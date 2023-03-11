@@ -155,9 +155,10 @@ public class RobotContainer {
       m_autonomousChooser.addOption("Drop and Charge", Autos.dropAndCharge(m_driveSubsystem, m_ArmSubsystem, m_IntakeSubsystem));
 
       m_autonomousChooser.addOption("Drop and Stay", Autos.drop(m_ArmSubsystem, m_IntakeSubsystem));
-    
+      
+      m_autonomousChooser.addOption("Just ChargeAuto", Autos.justChargeAuto(m_driveSubsystem));
 
-    m_autonomousChooser.setDefaultOption("Do Nothing", Autos.doNothing());
+      m_autonomousChooser.setDefaultOption("Do Nothing", Autos.doNothing());
     
     SmartDashboard.putData("Autonomous", m_autonomousChooser);
   }

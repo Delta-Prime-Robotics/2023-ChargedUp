@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import frc.robot.Constants;
+import frc.robot.Constants.BalanceState;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -48,6 +50,23 @@ public final class Autos {
     }
   };
 
+  public final static Boolean chargeSupplier(DriveSubsystem drive, int bState) {
+    double pitch = drive.m_navx.getPitch();
+    boolean result = false;
+    if ((bState == BalanceState.kUp) && (pitch > 1)) {
+      result = true;
+    }
+    else if ((bState == BalanceState.kDown) && (pitch < -1)) {
+      result = true;
+    }
+
+    else if ((bState == BalanceState.kLevel) && (Math.abs(pitch) < 0.5)) {
+      result = true;
+    }
+
+    return result;
+  }
+
   public static CommandBase justBackup(DriveSubsystem drive, BooleanSupplier driveEncoderSupplier) {
     // Backup 11' 5" plus half the length of the robot. Aim for ~12'
     drive.m_leftEncoder.setPosition(0.0);
@@ -57,6 +76,12 @@ public final class Autos {
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
       
 
+    );
+  }
+  public static CommandBase justChargeAuto(DriveSubsystem drive) {
+    return new ParallelDeadlineGroup(
+      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)),
+      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
     );
   }
 
@@ -138,6 +163,7 @@ public final class Autos {
     sequence.addCommands(intakeStop(intake));
     sequence.addCommands(armback(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
     sequence.addCommands(armStop(arm));
+  
 
     return sequence;
   }
