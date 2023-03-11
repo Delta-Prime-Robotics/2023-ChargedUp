@@ -50,8 +50,8 @@ public class DriveSubsystem extends SubsystemBase {
     
     //**Creates a drive subsystem */
     public DriveSubsystem() {
-        m_leftLeader = new CANSparkMax(RoboRio.CanID.kLeftLeader, MotorType.kBrushless);
-        m_leftMid = new CANSparkMax(RoboRio.CanID.kLeftMid, MotorType.kBrushless);
+        m_leftLeader = new CANSparkMax(RoboRio.CanID.kLeftMid, MotorType.kBrushless);
+        m_leftMid = new CANSparkMax(RoboRio.CanID.kLeftLeader, MotorType.kBrushless);
         m_leftBack = new CANSparkMax(RoboRio.CanID.kLeftBack, MotorType.kBrushless);
         m_rightLeader = new CANSparkMax(RoboRio.CanID.kRightLeader, MotorType.kBrushless);
         m_rightMid = new CANSparkMax(RoboRio.CanID.kRightMid, MotorType.kBrushless);

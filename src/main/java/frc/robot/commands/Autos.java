@@ -29,14 +29,23 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 public final class Autos {
   
   private static final double kBackupSpeed =  -0.5;
-  private static final double kBackupDuration = 3; // seconds
-  private static final double kOpenIntakeSpeed = 0.5;
-  private static final double kOpenIntakeDuration = 2;
+  private static final double kForwardSpeed =  0.5;
+  private static final double kJustBackUpTime = 3;
+  private static final double kArmForwardSpeed =  -0.5;
+  private static final double kArmBackwardsSpeed =  0.5;
+  private static final double kIntakeForwardSpeed =  -0.5;
+  private static final double kIntakeBackwardsSpeed =  0.5;
+  private static final double kOpenAndCloseIntakeDuration = 8;
   public static final double kJustBackUpEncoder = -10000;
   private static final double kArmRaiseMid = -100;
+  private static final double kArmRaiseMidTime = 2;
+  private static final double kArmCloseMidTime = 1.8;
   private static final double kIntakeOpen = 100;
   private static final double kChargeDuration = 2.15;
-
+  private static final double kRotation = 180;
+  private static final double kPitchUp = 10;
+  private static final double kPitchDown = -10;
+  private static final double KPitchLevel = 0.5;
   public static CommandBase doNothing() {
     return null;
   }
@@ -53,14 +62,24 @@ public final class Autos {
   public final static Boolean chargeSupplier(DriveSubsystem drive, int bState) {
     double pitch = drive.m_navx.getPitch();
     boolean result = false;
-    if ((bState == BalanceState.kUp) && (pitch > 1)) {
+    if ((bState == BalanceState.kUp) && (pitch > kPitchUp)) {
       result = true;
     }
-    else if ((bState == BalanceState.kDown) && (pitch < -1)) {
+    else if ((bState == BalanceState.kDown) && (pitch < kPitchDown)) {
       result = true;
     }
 
-    else if ((bState == BalanceState.kLevel) && (Math.abs(pitch) < 0.5)) {
+    else if ((bState == BalanceState.kLevel) && (Math.abs(pitch) < KPitchLevel)) {
+      result = true;
+    }
+
+    return result;
+  }
+
+  public final static Boolean rotationSupplier(DriveSubsystem drive, double rotation) {
+    double yaw = drive.m_navx.getYaw();
+    boolean result = false;
+    if (yaw > rotation) {
       result = true;
     }
 
@@ -72,17 +91,64 @@ public final class Autos {
     drive.m_leftEncoder.setPosition(0.0);
     drive.m_rightEncoder.setPosition(0.0);
     return new ParallelDeadlineGroup(
-      new WaitUntilCommand(driveEncoderSupplier),
+      new WaitCommand(kJustBackUpTime),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
-      
-
     );
   }
-  public static CommandBase justChargeAuto(DriveSubsystem drive) {
-    return new ParallelDeadlineGroup(
-      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)),
+
+  public static CommandBase rotate180(DriveSubsystem drive) {
+  double rotation = drive.m_navx.getYaw() + kRotation;
+  return new ParallelDeadlineGroup(
+      new WaitUntilCommand(() -> rotationSupplier(drive, rotation)),
+      new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
+    );
+  }
+  public static CommandBase moblityOverChargeStation(DriveSubsystem drive) {
+
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+
+    ParallelDeadlineGroup goOver = new ParallelDeadlineGroup(
+      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kDown)),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
     );
+    
+    ParallelDeadlineGroup goForward = new ParallelDeadlineGroup(
+      new WaitCommand(1),
+      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+    );
+
+    
+    sequence.addCommands(goOver);
+    sequence.addCommands(goForward);
+    return sequence;
+  }
+
+  public static CommandBase chargeAfterMoblity(DriveSubsystem drive) {
+
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+
+    ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
+        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)),
+        new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+      );
+
+      ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
+        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)),
+        new RunCommand(() -> drive.arcadeDrive(kBackupSpeed*0.75, 0),drive)
+      );
+
+      sequence.addCommands(goBack);
+      sequence.addCommands(goLevel);
+      return sequence;
+  }
+
+  public static CommandBase moblityTurnAndCharge(DriveSubsystem drive) {
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+    
+    sequence.addCommands(moblityOverChargeStation(drive));
+    sequence.addCommands(rotate180(drive));
+    sequence.addCommands(chargeAfterMoblity(drive));
+    return sequence;
   }
 
   public static CommandBase justCharge(DriveSubsystem drive) {
@@ -102,19 +168,13 @@ public final class Autos {
     }
   };
 
-  public static CommandBase intakeMove(IntakeSubsystem intake, BooleanSupplier intakeEncoderSupplier) {
+  public static CommandBase intakeMove(IntakeSubsystem intake, Double time, Double speed) {
     return new ParallelDeadlineGroup(
-      new WaitCommand(0.8),
-      new RunCommand(()-> intake.IntakeGo(-0.5), intake)
-    );
+      new WaitCommand(time),
+      new RunCommand(()-> intake.IntakeGo(-0.5), intake));
+    
   }
 
-  public static CommandBase intakeBack(IntakeSubsystem intake, BooleanSupplier intakeEncoderSupplier) {
-    return new ParallelDeadlineGroup(
-      new WaitCommand(0.8),
-      new RunCommand(()-> intake.IntakeGo(0.5), intake)
-    );
-  }
   public static CommandBase intakeStop(IntakeSubsystem intake) {
     return new InstantCommand(() -> intake.IntakeGo(0), intake);
   }
@@ -130,17 +190,10 @@ public final class Autos {
     }
   };
 
-  public static CommandBase armforward(ArmSubsystem arm, BooleanSupplier armEncoderSupplier) {
+  public static CommandBase armMove(ArmSubsystem arm, BooleanSupplier armEncoderSupplier, Double time, Double speed) {
     return new ParallelDeadlineGroup(
-      new WaitCommand(2),
+      new WaitCommand(time),
       new RunCommand(()-> arm.ArmGo(-0.5), arm)
-    );
-  }
-
-  public static CommandBase armback(ArmSubsystem arm, BooleanSupplier armEncoderSupplier) {
-    return new ParallelDeadlineGroup(
-      new WaitCommand(1.8),
-      new RunCommand(()-> arm.ArmGo(0.5), arm)
     );
   }
 
@@ -155,13 +208,13 @@ public final class Autos {
 
     sequence.addCommands(arm.resetEncoders());
     sequence.addCommands(intake.resetEncoders());
-    sequence.addCommands(armforward(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armMove(arm, () -> armEncoderSupplier(arm, kArmRaiseMid), kArmRaiseMidTime, kArmForwardSpeed));
     sequence.addCommands(armStop(arm));
-    sequence.addCommands(intakeMove(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
+    sequence.addCommands(intakeMove(intake, kOpenAndCloseIntakeDuration, kIntakeForwardSpeed));
     sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(intakeBack(intake, () -> intakeEncoderSupplier(intake,kIntakeOpen)));
+    sequence.addCommands(intakeMove(intake, kOpenAndCloseIntakeDuration, kIntakeBackwardsSpeed));
     sequence.addCommands(intakeStop(intake));
-    sequence.addCommands(armback(arm, () -> armEncoderSupplier(arm, kArmRaiseMid)));
+    sequence.addCommands(armMove(arm, () -> armEncoderSupplier(arm, kArmRaiseMid),kArmBackwardsSpeed, kArmCloseMidTime));
     sequence.addCommands(armStop(arm));
   
 
@@ -183,8 +236,7 @@ public final class Autos {
     //sequence.andThen(justBackup(drive));\
     sequence.addCommands(drop(arm, intake));
     sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive, kJustBackUpEncoder)));
-    
-
+    sequence.addCommands(rotate180(drive));
     return sequence;
   }
 
