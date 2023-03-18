@@ -16,7 +16,7 @@ public class ArmSubsystem extends SubsystemBase {
     
     private MotorControllerGroup m_MotorControllerGroup;
     //arm speed scale factor
-    private final double kScaleFactor = 0.5;
+    
     
     //Defineing the arm encoder
     public RelativeEncoder m_armEncoder;
@@ -61,7 +61,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     final double kDeadzone = 0.05;
     final double kMinNeededToMove = 0.1;
-    final double kSpeedLimit = 0.4;       // This should be a value <= 1.0
+    final double kSpeedLimit = 1;       // This should be a value <= 1.0
 
     double absSpeed = Math.abs(forwardSpeed);
 

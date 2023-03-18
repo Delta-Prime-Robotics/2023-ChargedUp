@@ -126,14 +126,14 @@ public class RobotContainer {
 
     if (m_driveSubsystem != null && m_Joystick != null) {
       m_driveSubsystem.setDefaultCommand(new ScaledArcadeDriveCommand(m_driveSubsystem, 
-        () -> -m_Joystick.getRawAxis(FlightStick.Axis.kFwdBack), 
+        () -> m_Joystick.getRawAxis(FlightStick.Axis.kFwdBack), 
         () -> -m_Joystick.getRawAxis(FlightStick.Axis.kRotate) * 0.75
       ));
     }
 
     if (m_ArmSubsystem != null && m_gamePad != null) {
       m_ArmSubsystem.setDefaultCommand(new ArmMoveCommand(m_ArmSubsystem, 
-      () -> m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
+      () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
       ));
     }
 

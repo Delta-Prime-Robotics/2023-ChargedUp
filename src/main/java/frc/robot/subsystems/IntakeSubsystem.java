@@ -22,7 +22,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem() {
         m_intakeMotor = new CANSparkMax(RoboRio.CanID.kIntakeControler, MotorType.kBrushless);
-        
+        m_intakeMotor.setSmartCurrentLimit(30);
+
         m_intakeEncoder = m_intakeMotor.getEncoder();
         // Need  value for Intake Encoder in Constents
         m_intakeEncoder.setPositionConversionFactor(1);
