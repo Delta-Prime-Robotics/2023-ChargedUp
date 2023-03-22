@@ -45,7 +45,7 @@ public final class Autos {
   private static final double kRotation = 180;
   private static final double kPitchUp = 10;
   private static final double kPitchDown = -10;
-  private static final double KPitchLevel = 2.66;
+  private static final double KPitchLevel = 2.66;  // this may need to be changed to something smaller?
 
   public static CommandBase doNothing() {
     return null;
@@ -152,12 +152,29 @@ public final class Autos {
 
     SequentialCommandGroup sequence = new SequentialCommandGroup();
     
+// we are now pointing towards the charge station. We want to move forward until we are pointed
+// "up" which is actually down based on the mobilityOverChargeStation method above ::
+// chargeSupplier(drive,BalanceState.kDown)   <--- We need to change to this
 
+// original code that does not stop (probably because we are going backwards?) *** DO NOT USE ***
     // ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
     //     new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(3),
     //     new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
     //   );
 
+// proposed new code: rolls until the back is pointing down
+    // ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
+    //     new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kDown)).withTimeout(3),
+    //     new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+    //   );
+
+// Proposed "balance" code
+    // ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
+    //    new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(2.55),
+    //    new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+
+    // Current code to get to the middle of the charge station with a timer
+    // **** COMMENT THIS OUT (or remove)
       ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
         //new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(3),
         new WaitCommand(2.55),
