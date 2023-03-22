@@ -246,8 +246,8 @@ public class DriveSubsystem extends SubsystemBase {
     NetworkTable table = inst.getTable("photonvision/Microsoft_LifeCam_HD-3000");
     // SmartDashboard.putBoolean("NT-hasTarget", table.getEntry("hasTarget").getBoolean(false));
     SmartDashboard.putNumber("Driver Encoder" , this.m_rightEncoder.getPosition());
-    SmartDashboard.putNumber("Roll", m_navx.getRoll());
-    SmartDashboard.putNumber("Pitch", m_navx.getPitch());
+    SmartDashboard.putNumber("Pitch", m_navx.getRoll());
+    SmartDashboard.putNumber("Roll", m_navx.getPitch());
     SmartDashboard.putNumber("Yaw", m_navx.getYaw());
   }
 

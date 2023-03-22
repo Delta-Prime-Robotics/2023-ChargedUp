@@ -28,14 +28,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 public final class Autos {
   
-  private static final double kBackupSpeed =  -0.5;
+  private static final double kBackupSpeed =  0.5;
   private static final double kForwardSpeed =  0.5;
   private static final double kJustBackUpTime = 3;
-  private static final double kArmForwardSpeed =  -0.5;
-  private static final double kArmBackwardsSpeed =  0.5;
+  private static final double kArmForwardSpeed =  0.5;
+  private static final double kArmBackwardsSpeed =  -0.5;
   private static final double kIntakeForwardSpeed =  -0.5;
   private static final double kIntakeBackwardsSpeed =  0.5;
-  private static final double kOpenAndCloseIntakeDuration = 8;
+  private static final double kOpenAndCloseIntakeDuration = 1;
   public static final double kJustBackUpEncoder = -10000;
   private static final double kArmRaiseMid = -100;
   private static final double kArmRaiseMidTime = 2;
@@ -45,7 +45,7 @@ public final class Autos {
   private static final double kRotation = 180;
   private static final double kPitchUp = 10;
   private static final double kPitchDown = -10;
-  private static final double KPitchLevel = 0.5;
+  private static final double KPitchLevel = 2.66;
 
   public static CommandBase doNothing() {
     return null;
@@ -75,7 +75,7 @@ public final class Autos {
     double pitch;
     boolean result = false;
     if (null != drive.m_navx) 
-      pitch = drive.m_navx.getPitch();
+      pitch = drive.m_navx.getRoll();
     else 
       return false;
     
@@ -122,7 +122,8 @@ public final class Autos {
   public static CommandBase rotate180(DriveSubsystem drive) {
   double rotation = drive.m_navx.getYaw() + kRotation;
   return new ParallelDeadlineGroup(
-      new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
+      //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
+      new WaitCommand(1),
       new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
     );
   }
@@ -132,7 +133,7 @@ public final class Autos {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
     ParallelDeadlineGroup goOver = new ParallelDeadlineGroup(
-      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kDown)).withTimeout(3),
+      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(5),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
     );
     
@@ -152,17 +153,18 @@ public final class Autos {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
     
 
-    ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
-        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(1.2),
+    // ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
+    //     new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(3),
+    //     new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+    //   );
+
+      ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
+        //new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(3),
+        new WaitCommand(2.55),
         new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
       );
 
-      ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
-        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(0.6),
-        new RunCommand(() -> drive.arcadeDrive(kBackupSpeed*0.75, 0),drive)
-      );
-
-      sequence.addCommands(goBack);
+      //sequence.addCommands(goBack);
       sequence.addCommands(goLevel);
       return sequence;
   }
@@ -225,7 +227,7 @@ public final class Autos {
     ParallelCommandGroup closeAll = new ParallelCommandGroup(
     (intakeMove(intake, kOpenAndCloseIntakeDuration, kIntakeBackwardsSpeed)),
     //(intakeStop(intake));
-    (armMove(arm, () -> armEncoderSupplier(arm, kArmRaiseMid),kArmCloseMidTime,kArmBackwardsSpeed))
+    (armMove(arm, () -> armEncoderSupplier(arm, kArmRaiseMid),kArmCloseMidTime, kArmBackwardsSpeed))
     //(armStop(arm));
     );
 

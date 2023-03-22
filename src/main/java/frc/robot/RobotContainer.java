@@ -158,6 +158,8 @@ public class RobotContainer {
       
       m_autonomousChooser.addOption("Get Moblity, Turn and Charge", Autos.moblityTurnAndCharge(m_driveSubsystem));
 
+      m_autonomousChooser.addOption("rotate 180", Autos.rotate180(m_driveSubsystem));
+
       m_autonomousChooser.setDefaultOption("Do Nothing", Autos.doNothing());
     
     SmartDashboard.putData("Autonomous", m_autonomousChooser);
