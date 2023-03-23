@@ -237,6 +237,17 @@ public final class Autos {
     
   }
   
+  public static CommandBase dropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
+  {
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+
+    sequence.addCommands(drop(arm, intake));
+    sequence.addCommands(moblityTurnAndCharge(drive));
+
+    return sequence;
+
+  }
+
   public static CommandBase drop(ArmSubsystem arm, IntakeSubsystem intake) {
 
     SequentialCommandGroup sequence = new SequentialCommandGroup();
