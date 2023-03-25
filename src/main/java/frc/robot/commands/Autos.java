@@ -123,7 +123,7 @@ public final class Autos {
   double rotation = drive.m_navx.getYaw() + kRotation;
   return new ParallelDeadlineGroup(
       //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
-      new WaitCommand(1),
+      new WaitCommand(1.15),
       new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
     );
   }
@@ -133,7 +133,7 @@ public final class Autos {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
     ParallelDeadlineGroup goOver = new ParallelDeadlineGroup(
-      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(5),
+      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(4),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
     );
     
@@ -177,7 +177,7 @@ public final class Autos {
     // **** COMMENT THIS OUT (or remove)
       ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
         //new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(3),
-        new WaitCommand(2.55),
+        new WaitCommand(2.53),
         new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
       );
 
@@ -287,7 +287,7 @@ public final class Autos {
     //sequence.andThen(justBackup(drive));\
     sequence.addCommands(drop(arm, intake));
     sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive, kJustBackUpEncoder)));
-    sequence.addCommands(rotate180(drive));
+    //sequence.addCommands(rotate180(drive));
     return sequence;
   }
 
