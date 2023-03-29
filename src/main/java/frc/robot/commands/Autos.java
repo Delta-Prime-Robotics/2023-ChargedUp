@@ -30,7 +30,7 @@ public final class Autos {
   
   private static final double kBackupSpeed =  0.5;
   private static final double kForwardSpeed =  0.5;
-  private static final double kJustBackUpTime = 3;
+  private static final double kJustBackUpTime = 3.4;
   private static final double kArmForwardSpeed =  0.5;
   private static final double kArmBackwardsSpeed =  -0.5;
   private static final double kIntakeForwardSpeed =  -0.5;
@@ -42,10 +42,11 @@ public final class Autos {
   private static final double kArmCloseMidTime = 1.8;
   private static final double kIntakeOpen = 100;
   private static final double kChargeDuration = 2.15;
-  private static final double kRotation = 180;
+  private static final double k180Rotation = 180;
+  private static final double k90Rotation = 90;
   private static final double kPitchUp = 10;
   private static final double kPitchDown = -10;
-  private static final double KPitchLevel = 2.66;  // this may need to be changed to something smaller?
+  private static final double KPitchLevel = 3;  // this may need to be changed to something smaller? 
 
   public static CommandBase doNothing() {
     return null;
@@ -120,7 +121,7 @@ public final class Autos {
   }
 
   public static CommandBase rotate180(DriveSubsystem drive) {
-  double rotation = drive.m_navx.getYaw() + kRotation;
+  double rotation = drive.m_navx.getYaw() + k180Rotation;
   return new ParallelDeadlineGroup(
       //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
       new WaitCommand(1.15),
@@ -128,6 +129,15 @@ public final class Autos {
     );
   }
 
+  public static CommandBase rotate90(DriveSubsystem drive) {
+    double rotation = drive.m_navx.getYaw() + k90Rotation;
+    return new ParallelDeadlineGroup(
+        //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
+        new WaitCommand(0.57),
+        new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
+      );
+    }
+  
   public static CommandBase moblityOverChargeStation(DriveSubsystem drive) {
 
     SequentialCommandGroup sequence = new SequentialCommandGroup();
@@ -177,7 +187,8 @@ public final class Autos {
     // **** COMMENT THIS OUT (or remove)
       ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
         //new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(3),
-        new WaitCommand(2.53),
+        // new WaitCommand(2.57),
+        new WaitCommand(2.72),
         new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
       );
 
@@ -192,6 +203,15 @@ public final class Autos {
     sequence.addCommands(moblityOverChargeStation(drive));
     sequence.addCommands(rotate180(drive));
     sequence.addCommands(chargeAfterMoblity(drive));
+    return sequence;
+  }
+
+  public static CommandBase testMoblityAndCharge(DriveSubsystem drive) {
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+    
+    sequence.addCommands(moblityOverChargeStation(drive));
+    sequence.addCommands(testChargeAfterMoblity(drive));
+    sequence.addCommands(rotate90(drive));
     return sequence;
   }
 
@@ -237,7 +257,18 @@ public final class Autos {
     
   }
   
-  public static CommandBase dropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
+  public static CommandBase blueDropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
+  {
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+
+    sequence.addCommands(drop(arm, intake));
+    sequence.addCommands(moblityTurnAndCharge(drive));
+
+    return sequence;
+
+  }
+
+  public static CommandBase redDropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
   {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
@@ -300,6 +331,45 @@ public final class Autos {
     sequence.addCommands(drop(arm, intake));
     sequence.addCommands(justCharge(drive));
 
+    return sequence;
+  }
+
+  public static CommandBase testChargeAfterMoblity(DriveSubsystem drive) {
+
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+    
+// we are now pointing towards the charge station. We want to move forward until we are pointed
+// "up" which is actually down based on the mobilityOverChargeStation method above ::
+// chargeSupplier(drive,BalanceState.kDown)   <--- We need to change to this
+
+// original code that does not stop (probably because we are going backwards?) *** DO NOT USE ***
+    // ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
+    //     new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(3),
+    //     new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+    //   );
+
+
+// proposed new code: rolls until the back is pointing down
+    ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
+        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(3),
+        new RunCommand(() -> drive.arcadeDrive(-kBackupSpeed, 0),drive)
+      );
+
+// Proposed "balance" code
+    ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
+       new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(4),
+       new RunCommand(() -> drive.arcadeDrive(-kBackupSpeed* 0.7, 0), drive));
+
+    // // Current code to get to the middle of the charge station with a timer
+    // // **** COMMENT THIS OUT (or remove)
+    //   ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
+    //     //new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(3),
+    //     new WaitCommand(2.53),
+    //     new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
+    //   );
+    sequence.addCommands(new WaitCommand(0.5));
+    sequence.addCommands(goBack);
+    sequence.addCommands(goLevel);
     return sequence;
   }
 
