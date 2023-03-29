@@ -5,8 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.CvSink;
-import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -75,9 +73,9 @@ public class RobotContainer {
     m_gamePad = new Joystick(Laptop.UsbPort.kGamePad);
     m_Joystick = new Joystick(Laptop.UsbPort.kFlightJoystick);
     // Cameras (comment out to exclude a camera from the robot);
+    m_camera1 = CameraServer.startAutomaticCapture(0);
     if (m_camera1 != null) {
       m_camera1.setResolution(320, 240);
-      CameraServer.putVideo(null, 320, 240);
     }
 
     m_camera2 = CameraServer.startAutomaticCapture(1);
