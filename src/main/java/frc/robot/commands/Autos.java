@@ -72,6 +72,16 @@ public final class Autos {
     }
   };
 
+  private final static boolean armEncoderSupplier(ArmSubsystem arm, double encoder) {
+    SmartDashboard.putNumber("Arm Encoder",arm.m_armEncoder.getPosition());
+    if (arm.m_armEncoder.getPosition() > encoder) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  };
+
   public final static Boolean chargeSupplier(DriveSubsystem drive, int bState) {
     double pitch;
     boolean result = false;
@@ -109,7 +119,32 @@ public final class Autos {
 
     return result;
   }
+  public static CommandBase rotate180(DriveSubsystem drive) {
+    double rotation = drive.m_navx.getYaw() + k180Rotation;
+    return new ParallelDeadlineGroup(
+        //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
+        new WaitCommand(1.15),
+        new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
+      );
+    }
+  
+    public static CommandBase rotate90(DriveSubsystem drive) {
+      double rotation = drive.m_navx.getYaw() + k90Rotation;
+      return new ParallelDeadlineGroup(
+          //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
+          new WaitCommand(0.57),
+          new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
+        );
+      }
 
+  /**
+   * justBackup is a CommandBase Parallel DeadlineGroup.
+  * It runs a wait command and a run command at the same time, ending when the wait command is finished.
+   * The run Command uses the drive.arcadeDrive command at a speed. 
+   * During 2023 we used command on the left and right edges of the community to drive the robot out of the community.
+   * Its also sequnced in other commands like drop and Backup.
+   * @return
+   */
   public static CommandBase justBackup(DriveSubsystem drive, BooleanSupplier driveEncoderSupplier) {
     // Backup 11' 5" plus half the length of the robot. Aim for ~12'
     drive.m_leftEncoder.setPosition(0.0);
@@ -120,24 +155,13 @@ public final class Autos {
     );
   }
 
-  public static CommandBase rotate180(DriveSubsystem drive) {
-  double rotation = drive.m_navx.getYaw() + k180Rotation;
-  return new ParallelDeadlineGroup(
-      //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
-      new WaitCommand(1.15),
-      new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
+  public static CommandBase justCharge(DriveSubsystem drive) {
+    return new ParallelDeadlineGroup(
+      new WaitCommand(kChargeDuration),
+      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
     );
   }
 
-  public static CommandBase rotate90(DriveSubsystem drive) {
-    double rotation = drive.m_navx.getYaw() + k90Rotation;
-    return new ParallelDeadlineGroup(
-        //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
-        new WaitCommand(0.57),
-        new RunCommand(() -> drive.arcadeDrive(0, 0.5),drive)
-      );
-    }
-  
   public static CommandBase moblityOverChargeStation(DriveSubsystem drive) {
 
     SequentialCommandGroup sequence = new SequentialCommandGroup();
@@ -206,23 +230,6 @@ public final class Autos {
     return sequence;
   }
 
-  public static CommandBase testMoblityAndCharge(DriveSubsystem drive) {
-    SequentialCommandGroup sequence = new SequentialCommandGroup();
-    
-    sequence.addCommands(moblityOverChargeStation(drive));
-    sequence.addCommands(testChargeAfterMoblity(drive));
-    sequence.addCommands(rotate90(drive));
-    return sequence;
-  }
-
-  public static CommandBase justCharge(DriveSubsystem drive) {
-    return new ParallelDeadlineGroup(
-      new WaitCommand(kChargeDuration),
-      new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
-    );
-  }
-
-
   public static CommandBase intakeMove(IntakeSubsystem intake, Double time, Double speed) {
     return new ParallelDeadlineGroup(
       new WaitCommand(time),
@@ -233,17 +240,6 @@ public final class Autos {
   public static CommandBase intakeStop(IntakeSubsystem intake) {
     return new InstantCommand(() -> intake.IntakeGo(0), intake);
   }
-
- 
-  private final static boolean armEncoderSupplier(ArmSubsystem arm, double encoder) {
-    SmartDashboard.putNumber("Arm Encoder",arm.m_armEncoder.getPosition());
-    if (arm.m_armEncoder.getPosition() > encoder) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  };
 
   public static CommandBase armMove(ArmSubsystem arm, BooleanSupplier armEncoderSupplier, Double time, Double speed) {
     return new ParallelDeadlineGroup(
@@ -257,18 +253,8 @@ public final class Autos {
     
   }
   
-  public static CommandBase blueDropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
-  {
-    SequentialCommandGroup sequence = new SequentialCommandGroup();
 
-    sequence.addCommands(drop(arm, intake));
-    sequence.addCommands(moblityTurnAndCharge(drive));
-
-    return sequence;
-
-  }
-
-  public static CommandBase redDropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
+  public static CommandBase DropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
   {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
@@ -304,21 +290,11 @@ public final class Autos {
   }
 
   public static CommandBase dropAndBackUp(DriveSubsystem drive, ArmSubsystem arm, IntakeSubsystem intake) {
-    // if (arm == null || intake == null) {
-    //   return justBackup(drive);
-    // }
 
     // Build a sequential command
     SequentialCommandGroup sequence = new SequentialCommandGroup();
-    // Raise to arm to tier 1
-    // Then open intake
-    //Then BackUp
-    // sequence.addCommands(arm.raiseToTier1Command());
-    // sequence.andThen(intake.openCommand());
-    //sequence.andThen(justBackup(drive));\
     sequence.addCommands(drop(arm, intake));
     sequence.addCommands(justBackup(drive, () -> driveEncoderSupplier(drive, kJustBackUpEncoder)));
-    //sequence.addCommands(rotate180(drive));
     return sequence;
   }
 
@@ -331,6 +307,15 @@ public final class Autos {
     sequence.addCommands(drop(arm, intake));
     sequence.addCommands(justCharge(drive));
 
+    return sequence;
+  }
+
+  public static CommandBase testMoblityAndCharge(DriveSubsystem drive) {
+    SequentialCommandGroup sequence = new SequentialCommandGroup();
+    
+    sequence.addCommands(moblityOverChargeStation(drive));
+    sequence.addCommands(testChargeAfterMoblity(drive));
+    //sequence.addCommands(rotate90(drive));
     return sequence;
   }
 
