@@ -47,6 +47,7 @@ public final class Autos {
   private static final double kPitchUp = 10;
   private static final double kPitchDown = -10;
   private static final double KPitchLevel = 3;  // this may need to be changed to something smaller? 
+  private static final double m_lastPitch = -999999;
 
   public static CommandBase doNothing() {
     return null;
@@ -61,6 +62,15 @@ public final class Autos {
       return false;
     }
   };
+
+  public final static double pitchSupplier(DriveSubsystem drive) {
+  
+    if (null != drive.m_navx) 
+     return (double)drive.m_navx.getRoll();
+    else 
+      return -999999.0;
+  };
+
 
   private final static boolean intakeEncoderSupplier(IntakeSubsystem intake, double encoder) {
     SmartDashboard.putNumber("Intake Encoder",intake.m_intakeEncoder.getPosition());
@@ -310,7 +320,7 @@ public final class Autos {
     return sequence;
   }
 
-  public static CommandBase testMoblityAndCharge(DriveSubsystem drive) {
+  public static CommandBase testMoblityAndCharge(DriveSubsystem drive, double pitchSupplier) {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
     
     sequence.addCommands(moblityOverChargeStation(drive));
@@ -322,17 +332,6 @@ public final class Autos {
   public static CommandBase testChargeAfterMoblity(DriveSubsystem drive) {
 
     SequentialCommandGroup sequence = new SequentialCommandGroup();
-    
-// we are now pointing towards the charge station. We want to move forward until we are pointed
-// "up" which is actually down based on the mobilityOverChargeStation method above ::
-// chargeSupplier(drive,BalanceState.kDown)   <--- We need to change to this
-
-// original code that does not stop (probably because we are going backwards?) *** DO NOT USE ***
-    // ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
-    //     new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(3),
-    //     new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
-    //   );
-
 
 // proposed new code: rolls until the back is pointing down
     ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
@@ -345,13 +344,7 @@ public final class Autos {
        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(4),
        new RunCommand(() -> drive.arcadeDrive(-kBackupSpeed* 0.7, 0), drive));
 
-    // // Current code to get to the middle of the charge station with a timer
-    // // **** COMMENT THIS OUT (or remove)
-    //   ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
-    //     //new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(3),
-    //     new WaitCommand(2.53),
-    //     new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
-    //   );
+   
     sequence.addCommands(new WaitCommand(0.5));
     sequence.addCommands(goBack);
     sequence.addCommands(goLevel);
