@@ -47,6 +47,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Instance variable for collision detection
     private double m_lastLinearAccelY;
+
+    public double m_lastPitchValue = -9999;
     
     //**Creates a drive subsystem */
     public DriveSubsystem() {

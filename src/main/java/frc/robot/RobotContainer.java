@@ -158,7 +158,7 @@ public class RobotContainer {
       
       m_autonomousChooser.addOption("Get Moblity, and Charge Test", Autos.testMoblityAndCharge(m_driveSubsystem));
 
-      m_autonomousChooser.addOption("*****Drop, Mobillity, Charge****", Autos.blueDropMoblityTurnAndCharge(m_ArmSubsystem, m_IntakeSubsystem, m_driveSubsystem));
+      m_autonomousChooser.addOption("*****Drop, Mobillity, Charge****", Autos.DropMoblityTurnAndCharge(m_ArmSubsystem, m_IntakeSubsystem, m_driveSubsystem));
 
       //m_autonomousChooser.addOption("rotate 180", Autos.rotate180(m_driveSubsystem));
 
