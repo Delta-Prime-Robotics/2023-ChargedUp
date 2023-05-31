@@ -85,8 +85,10 @@ public final class Autos {
   public final static Boolean chargeSupplier(DriveSubsystem drive, int bState) {
     double pitch;
     boolean result = false;
-    if (null != drive.m_navx) 
+    if (null != drive.m_navx) {
       pitch = drive.m_navx.getRoll();
+      drive.m_lastPitchValue = pitch;
+    }
     else 
       return false;
     
@@ -103,7 +105,21 @@ public final class Autos {
 
     return result;
   }
+  //maybe change results to seting drivetrain speed? 
+  //and make it into a command not Boolean
+  public final static Boolean levelSupplier(DriveSubsystem drive) {
+    double pitch;
+    boolean result = false;
+    if (null != drive.m_navx) {
+      pitch = drive.m_navx.getRoll();
+      if (pitch >= drive.m_lastPitchValue-1 && pitch <= drive.m_lastPitchValue +3) {
+        result = true;
+      }
 
+    }
+    
+    return result;
+  }
   public final static Boolean rotationSupplier(DriveSubsystem drive, double rotation) {
     double yaw;
     boolean result = false;
@@ -341,6 +357,7 @@ public final class Autos {
       );
 
 // Proposed "balance" code
+
     ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(4),
        new RunCommand(() -> drive.arcadeDrive(-kBackupSpeed* 0.7, 0), drive));
