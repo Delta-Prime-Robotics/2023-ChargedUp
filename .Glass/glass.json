@@ -1,0 +1,60 @@
+{
+  "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
+    "Retained Values": {
+      "open": false
+    },
+    "transitory": {
+      "LiveWindow": {
+        ".status": {
+          "open": true
+        }
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Autonomous": "String Chooser"
+    },
+    "windows": {
+      "/SmartDashboard/Autonomous": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "visible": true
+  },
+  "NetworkTables Log": {
+    "visible": true
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT3)",
+    "serverTeam": "localhost",
+    "visible": false
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "label": "Speed"
+            },
+            {
+              "label": "Distance"
+            }
+          ],
+          "height": 302,
+          "yaxis2": true
+        }
+      ],
+      "window": {
+        "name": "Speed vs distance"
+      }
+    }
+  }
+}

@@ -12,11 +12,15 @@ import frc.robot.subsystems.IntakeSubsystem;
 
 import java.util.function.BooleanSupplier;
 
+import javax.naming.spi.DirStateFactory.Result;
+
+import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -47,6 +51,7 @@ public final class Autos {
   private static final double kPitchUp = 10;
   private static final double kPitchDown = -10;
   private static final double KPitchLevel = 3;  // this may need to be changed to something smaller? 
+
 
   public static CommandBase doNothing() {
     return null;
@@ -87,7 +92,7 @@ public final class Autos {
     boolean result = false;
     if (null != drive.m_navx) {
       pitch = drive.m_navx.getRoll();
-      drive.m_lastPitchValue = pitch;
+      drive.m_lastPitchValue = drive.m_navx.getRoll();
     }
     else 
       return false;
@@ -105,21 +110,39 @@ public final class Autos {
 
     return result;
   }
+  
   //maybe change results to seting drivetrain speed? 
   //and make it into a command not Boolean
-  public final static Boolean levelSupplier(DriveSubsystem drive) {
+  public final static RepeatCommand levelSupplier(DriveSubsystem drive) {
     double pitch;
-    boolean result = false;
+    double delayedPitch;
+    double pitchDiff = 2;
+    double halfChargeAngle = 32;
+    Boolean result = false;
+    int commandValue = 0; 
+  
     if (null != drive.m_navx) {
       pitch = drive.m_navx.getRoll();
-      if (pitch >= drive.m_lastPitchValue-1 && pitch <= drive.m_lastPitchValue +3) {
-        result = true;
+      delayedPitch = drive.m_navx.getRoll() + pitchDiff;
+      
+      if (pitch < delayedPitch) {
+      System.out.print("Yes");
+      }
+      
+      if(pitch <=  halfChargeAngle && commandValue < 1 ){
+        
       }
 
+      if (pitch >= delayedPitch && pitch <= drive.m_lastPitchValue +3) { 
+      }
     }
     
-    return result;
+    return null;
   }
+
+
+
+
   public final static Boolean rotationSupplier(DriveSubsystem drive, double rotation) {
     double yaw;
     boolean result = false;
@@ -135,6 +158,7 @@ public final class Autos {
 
     return result;
   }
+
   public static CommandBase rotate180(DriveSubsystem drive) {
     double rotation = drive.m_navx.getYaw() + k180Rotation;
     return new ParallelDeadlineGroup(
