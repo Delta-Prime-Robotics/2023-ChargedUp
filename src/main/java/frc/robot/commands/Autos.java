@@ -9,11 +9,14 @@ import frc.robot.Constants.BalanceState;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.Sensors;
 
+import java.lang.System.Logger.Level;
 import java.util.function.BooleanSupplier;
 
 import javax.naming.spi.DirStateFactory.Result;
 
+import edu.wpi.first.util.concurrent.Semaphore;
 import edu.wpi.first.wpilibj.event.BooleanEvent;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -87,12 +90,13 @@ public final class Autos {
     }
   };
 
-  public final static Boolean chargeSupplier(DriveSubsystem drive, int bState) {
+  public final static Boolean chargeSupplier(Sensors sensors, int bState) {
     double pitch;
+    double m_lastPitchValue = -9999;
     boolean result = false;
-    if (null != drive.m_navx) {
-      pitch = drive.m_navx.getRoll();
-      drive.m_lastPitchValue = drive.m_navx.getRoll();
+    if (null != sensors.m_navx) {
+      pitch = sensors.m_navx.getRoll();
+      m_lastPitchValue = sensors.m_navx.getRoll();
     }
     else 
       return false;
@@ -113,7 +117,7 @@ public final class Autos {
   
   //maybe change results to seting drivetrain speed? 
   //and make it into a command not Boolean
-  public final static RepeatCommand levelSupplier(DriveSubsystem drive) {
+  public final CommandBase levelSupplier(DriveSubsystem drive, Sensors sensors) {
     double pitch;
     double delayedPitch;
     double pitchDiff = 2;
@@ -121,20 +125,23 @@ public final class Autos {
     Boolean result = false;
     int commandValue = 0; 
   
-    if (null != drive.m_navx) {
-      pitch = drive.m_navx.getRoll();
-      delayedPitch = drive.m_navx.getRoll() + pitchDiff;
+    if (null != sensors.m_navx) {
+      pitch = sensors.m_navx.getRoll();
+      delayedPitch = sensors.m_navx.getRoll() + pitchDiff;
       
-      if (pitch < delayedPitch) {
-      System.out.print("Yes");
-      }
+      // if (pitch < delayedPitch) {
+      // System.out.print("Yes");
+      // }
       
-      if(pitch <=  halfChargeAngle && commandValue < 1 ){
-        
-      }
 
-      if (pitch >= delayedPitch && pitch <= drive.m_lastPitchValue +3) { 
+      if(pitch <=  halfChargeAngle){
+        drive.arcadeDrive(0.05, 0);
+        if (pitch >= delayedPitch && pitch <= drive.m_lastPitchValue +3) { 
+
+        }
       }
+      else {}
+
     }
     
     return null;
@@ -143,12 +150,12 @@ public final class Autos {
 
 
 
-  public final static Boolean rotationSupplier(DriveSubsystem drive, double rotation) {
+  public final static Boolean rotationSupplier(DriveSubsystem drive, double rotation, Sensors sensors) {
     double yaw;
     boolean result = false;
 
-    if(null != drive.m_navx)
-      yaw = drive.m_navx.getYaw();
+    if(null != sensors.m_navx)
+      yaw = sensors.m_navx.getYaw();
     else
       return false;
 
@@ -159,8 +166,8 @@ public final class Autos {
     return result;
   }
 
-  public static CommandBase rotate180(DriveSubsystem drive) {
-    double rotation = drive.m_navx.getYaw() + k180Rotation;
+  public static CommandBase rotate180(DriveSubsystem drive,Sensors sensors) {
+    double rotation = sensors.m_navx.getYaw() + k180Rotation;
     return new ParallelDeadlineGroup(
         //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
         new WaitCommand(1.15),
@@ -168,8 +175,8 @@ public final class Autos {
       );
     }
   
-    public static CommandBase rotate90(DriveSubsystem drive) {
-      double rotation = drive.m_navx.getYaw() + k90Rotation;
+    public static CommandBase rotate90(DriveSubsystem drive, Sensors sensors) {
+      double rotation = sensors.m_navx.getYaw() + k90Rotation;
       return new ParallelDeadlineGroup(
           //new WaitUntilCommand(() -> rotationSupplier(drive, rotation)).withTimeout(2),
           new WaitCommand(0.57),
@@ -202,12 +209,12 @@ public final class Autos {
     );
   }
 
-  public static CommandBase moblityOverChargeStation(DriveSubsystem drive) {
+  public static CommandBase moblityOverChargeStation(DriveSubsystem drive,Sensors sensors) {
 
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
     ParallelDeadlineGroup goOver = new ParallelDeadlineGroup(
-      new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(4),
+      new WaitUntilCommand(() -> chargeSupplier(sensors,BalanceState.kUp)).withTimeout(4),
       new RunCommand(() -> drive.arcadeDrive(kBackupSpeed, 0),drive)
     );
     
@@ -261,11 +268,11 @@ public final class Autos {
       return sequence;
   }
 
-  public static CommandBase moblityTurnAndCharge(DriveSubsystem drive) {
+  public static CommandBase moblityTurnAndCharge(DriveSubsystem drive,Sensors sensors) {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
     
-    sequence.addCommands(moblityOverChargeStation(drive));
-    sequence.addCommands(rotate180(drive));
+    sequence.addCommands(moblityOverChargeStation(drive,sensors));
+    sequence.addCommands(rotate180(drive,sensors));
     sequence.addCommands(chargeAfterMoblity(drive));
     return sequence;
   }
@@ -294,12 +301,12 @@ public final class Autos {
   }
   
 
-  public static CommandBase DropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive)
+  public static CommandBase DropMoblityTurnAndCharge(ArmSubsystem arm, IntakeSubsystem intake, DriveSubsystem drive,Sensors sensors)
   {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
 
     sequence.addCommands(drop(arm, intake));
-    sequence.addCommands(moblityTurnAndCharge(drive));
+    sequence.addCommands(moblityTurnAndCharge(drive,sensors));
 
     return sequence;
 
@@ -350,16 +357,16 @@ public final class Autos {
     return sequence;
   }
 
-  public static CommandBase testMoblityAndCharge(DriveSubsystem drive) {
+  public static CommandBase testMoblityAndCharge(DriveSubsystem drive,Sensors sensors) {
     SequentialCommandGroup sequence = new SequentialCommandGroup();
     
-    sequence.addCommands(moblityOverChargeStation(drive));
-    sequence.addCommands(testChargeAfterMoblity(drive));
+    sequence.addCommands(moblityOverChargeStation(drive,sensors));
+    sequence.addCommands(testChargeAfterMoblity(drive,sensors));
     //sequence.addCommands(rotate90(drive));
     return sequence;
   }
 
-  public static CommandBase testChargeAfterMoblity(DriveSubsystem drive) {
+  public static CommandBase testChargeAfterMoblity(DriveSubsystem drive, Sensors sensors) {
 
     SequentialCommandGroup sequence = new SequentialCommandGroup();
     
@@ -376,14 +383,14 @@ public final class Autos {
 
 // proposed new code: rolls until the back is pointing down
     ParallelDeadlineGroup goBack = new ParallelDeadlineGroup(
-        new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kUp)).withTimeout(3),
+        new WaitUntilCommand(() -> chargeSupplier(sensors,BalanceState.kUp)).withTimeout(3),
         new RunCommand(() -> drive.arcadeDrive(-kBackupSpeed, 0),drive)
       );
 
 // Proposed "balance" code
 
     ParallelDeadlineGroup goLevel = new ParallelDeadlineGroup(
-       new WaitUntilCommand(() -> chargeSupplier(drive,BalanceState.kLevel)).withTimeout(4),
+       new WaitUntilCommand(() -> chargeSupplier(sensors,BalanceState.kLevel)).withTimeout(4),
        new RunCommand(() -> drive.arcadeDrive(-kBackupSpeed* 0.7, 0), drive));
 
     // // Current code to get to the middle of the charge station with a timer

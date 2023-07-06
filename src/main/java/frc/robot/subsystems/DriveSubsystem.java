@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.SPI;
 import com.kauailabs.navx.frc.*;
+import frc.robot.subsystems.Sensors;
 
 public class DriveSubsystem extends SubsystemBase {
   
@@ -29,6 +30,7 @@ public class DriveSubsystem extends SubsystemBase {
     private static final double kClosedLoopRampRate = 0.3;
 
     private static final double kCollisionThresholdDeltaG = 0.5;
+    private Sensors sensors;
 
     // Drive components
     private CANSparkMax m_leftLeader;
@@ -43,7 +45,7 @@ public class DriveSubsystem extends SubsystemBase {
     public RelativeEncoder m_leftEncoder;
     public RelativeEncoder m_rightEncoder;
 
-    public AHRS m_navx; // The NavX IMU (gyro)
+    
 
     // Instance variable for collision detection
     private double m_lastLinearAccelY;
@@ -75,15 +77,6 @@ public class DriveSubsystem extends SubsystemBase {
 
         m_leftEncoder.setPositionConversionFactor(Constants.RobotConfig.kDistancePerRotation);
         m_rightEncoder.setPositionConversionFactor(Constants.RobotConfig.kDistancePerRotation);
-
-        try {
-          m_navx = new AHRS(SPI.Port.kMXP);
-          m_navx.calibrate();
-          m_navx.reset();
-        }
-        catch (RuntimeException ex) {
-          DriverStation.reportError("Error instantiating navX MSP: " + ex.getMessage(), true);
-        }
   }
 
 
@@ -204,8 +197,8 @@ public class DriveSubsystem extends SubsystemBase {
   public void detectCollision() {
     boolean collisionDetectedY = false;
 
-    if (m_navx != null) {
-      double currentLinearAccelY = m_navx.getWorldLinearAccelY();
+    if (sensors.m_navx != null) {
+      double currentLinearAccelY = sensors.m_navx.getWorldLinearAccelY();
       double currentJerkY = currentLinearAccelY - m_lastLinearAccelY;
       m_lastLinearAccelY = currentLinearAccelY;
 
@@ -224,7 +217,7 @@ public class DriveSubsystem extends SubsystemBase {
   
   /**
    * Sets the idle mode for all motor controllers in the drive subsystem.
-   * @param mode Idle mode (coast or brake).
+   * @param mode Idle mode (IdleMode.coast or IdleMode.brake).
    */
   public void setIdleMode(IdleMode mode) {
 		m_leftLeader.setIdleMode(mode);
@@ -248,9 +241,6 @@ public class DriveSubsystem extends SubsystemBase {
     NetworkTable table = inst.getTable("photonvision/Microsoft_LifeCam_HD-3000");
     // SmartDashboard.putBoolean("NT-hasTarget", table.getEntry("hasTarget").getBoolean(false));
     SmartDashboard.putNumber("Driver Encoder" , this.m_rightEncoder.getPosition());
-    SmartDashboard.putNumber("Pitch", m_navx.getRoll());
-    SmartDashboard.putNumber("Roll", m_navx.getPitch());
-    SmartDashboard.putNumber("Yaw", m_navx.getYaw());
   }
 
   @Override

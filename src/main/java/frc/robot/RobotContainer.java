@@ -25,6 +25,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 //import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.Sensors;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -38,6 +39,7 @@ public class RobotContainer {
   private DriveSubsystem m_driveSubsystem = null;
   private IntakeSubsystem m_IntakeSubsystem = null;
   private ArmSubsystem m_ArmSubsystem = null;
+  private Sensors m_sensor = null;
   //private SensorArraySubsystem m_sensorArray = null;
   // private Compressor m_pcmCompressor = null;
   // private Solenoid m_exampleSolenoidPCM = null;
@@ -157,9 +159,9 @@ public class RobotContainer {
 
       m_autonomousChooser.addOption("Drop and Stay", Autos.drop(m_ArmSubsystem, m_IntakeSubsystem));
       
-      m_autonomousChooser.addOption("TEST!# Get Moblity, and Charge #!TEST", Autos.testMoblityAndCharge(m_driveSubsystem));
+      m_autonomousChooser.addOption("TEST!# Get Moblity, and Charge #!TEST", Autos.testMoblityAndCharge(m_driveSubsystem,m_sensor));
 
-      m_autonomousChooser.addOption("*****Drop, Mobillity, Charge****", Autos.DropMoblityTurnAndCharge(m_ArmSubsystem, m_IntakeSubsystem, m_driveSubsystem));
+      m_autonomousChooser.addOption("*****Drop, Mobillity, Charge****", Autos.DropMoblityTurnAndCharge(m_ArmSubsystem, m_IntakeSubsystem, m_driveSubsystem,m_sensor));
 
       //m_autonomousChooser.addOption("rotate 180", Autos.rotate180(m_driveSubsystem));
 

@@ -14,7 +14,7 @@ public class ArmSubsystem extends SubsystemBase {
     private CANSparkMax m_armLeader;
     private CANSparkMax m_armFollower;
     
-    private MotorControllerGroup m_MotorControllerGroup;
+    private MotorControllerGroup m_ArmMotorControllerGroup;
     //arm speed scale factor
     
     
@@ -26,7 +26,7 @@ public class ArmSubsystem extends SubsystemBase {
         m_armLeader = new CANSparkMax(RoboRio.CanID.kArmLeader, MotorType.kBrushless);
         m_armFollower = new CANSparkMax(RoboRio.CanID.kArmFollower, MotorType.kBrushless);
         m_armFollower.setInverted(true);
-        m_MotorControllerGroup = new MotorControllerGroup(m_armLeader, m_armFollower);
+        m_ArmMotorControllerGroup = new MotorControllerGroup(m_armLeader, m_armFollower);
 
         // Need  value for Arm Encoder in Constents
         m_armEncoder = m_armLeader.getEncoder();
@@ -90,7 +90,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     forwardSpeed = applyLinearConstraints(forwardSpeed);
 
-    m_MotorControllerGroup.set(forwardSpeed);
+    m_ArmMotorControllerGroup.set(forwardSpeed);
   }
 
   // public void ArmGoEncoder(double speed) {
@@ -107,7 +107,7 @@ public class ArmSubsystem extends SubsystemBase {
    */
   public void stop() {
 
-    m_MotorControllerGroup.set(0.0);
+    m_ArmMotorControllerGroup.set(0.0);
   }
 
   @Override
