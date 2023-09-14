@@ -10,7 +10,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FlightStick;
 import frc.robot.Constants.GamePad;
@@ -23,6 +25,7 @@ import frc.robot.commands.ScaledArcadeDriveCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+
 //import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 
@@ -123,14 +126,25 @@ public class RobotContainer {
     
   
   private void configureDefaultCommands() {
+  
 
     if (m_driveSubsystem != null && m_Joystick != null) {
+      
       m_driveSubsystem.setDefaultCommand(new ScaledArcadeDriveCommand(m_driveSubsystem, 
-        () -> m_Joystick.getRawAxis(FlightStick.Axis.kFwdBack), 
-        () -> -m_Joystick.getRawAxis(FlightStick.Axis.kRotate) * 0.75
+        () -> m_gamePad.getRawAxis(1), 
+        () -> -m_gamePad.getRawAxis(2) * 0.75
       ));
     }
 
+    // if (m_driveSubsystem != null && m_Joystick != null) {
+      
+    //   m_driveSubsystem.setDefaultCommand(new ScaledArcadeDriveCommand(m_driveSubsystem, 
+    //     () -> m_gamePad.getRawAxis(1), 
+    //     () -> -m_gamePad.getRawAxis(0) * 0.75
+    //   ));
+    // }
+
+    
     if (m_ArmSubsystem != null && m_gamePad != null) {
       m_ArmSubsystem.setDefaultCommand(new ArmMoveCommand(m_ArmSubsystem, 
       () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
@@ -156,7 +170,7 @@ public class RobotContainer {
 
       m_autonomousChooser.addOption("Drop and Stay", Autos.drop(m_ArmSubsystem, m_IntakeSubsystem));
       
-      m_autonomousChooser.addOption("Get Moblity, and Charge Test", Autos.testMoblityAndCharge(m_driveSubsystem, () -> Autos.pitchSupplier(m_driveSubsystem)));
+      //m_autonomousChooser.addOption("Get Moblity, and Charge Test", Autos.testMoblityAndCharge(m_driveSubsystem, () -> Autos.pitchSupplier(m_driveSubsystem)));
 
       m_autonomousChooser.addOption("*****Drop, Mobillity, Charge****", Autos.DropMoblityTurnAndCharge(m_ArmSubsystem, m_IntakeSubsystem, m_driveSubsystem));
 
