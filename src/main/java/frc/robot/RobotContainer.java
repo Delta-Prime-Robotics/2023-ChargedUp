@@ -10,9 +10,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FlightStick;
 import frc.robot.Constants.GamePad;
@@ -25,7 +23,6 @@ import frc.robot.commands.ScaledArcadeDriveCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
-
 //import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 
@@ -47,8 +44,8 @@ public class RobotContainer {
   // private boolean m_solenoidState = false;
   
   // Operator interface
-  private Joystick m_gamePad = null;
-  private Joystick m_Joystick = null;
+  private Joystick m_gamePadO = null;
+  private Joystick m_gamePadDr = null;
   
   // Cameras
   private UsbCamera m_camera1;
@@ -73,8 +70,8 @@ public class RobotContainer {
     //m_pcmCompressor = new Compressor(0, CanID.kLeftLeader);
    // m_exampleSolenoidPCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
     // Controllers (comment out to exclude a controller from the laptop)
-    m_gamePad = new Joystick(Laptop.UsbPort.kGamePad);
-    m_Joystick = new Joystick(Laptop.UsbPort.kFlightJoystick);
+    m_gamePadO = new Joystick(Laptop.UsbPort.kGamePadO);
+    m_gamePadDr = new Joystick(Laptop.UsbPort.kGamePadDr);
     // Cameras (comment out to exclude a camera from the robot);
     m_camera1 = CameraServer.startAutomaticCapture(0);
     if (m_camera1 != null) {
@@ -126,34 +123,23 @@ public class RobotContainer {
     
   
   private void configureDefaultCommands() {
-  
 
-    if (m_driveSubsystem != null && m_Joystick != null) {
-      
+    if (m_driveSubsystem != null && m_gamePadDr != null) {
       m_driveSubsystem.setDefaultCommand(new ScaledArcadeDriveCommand(m_driveSubsystem, 
-        () -> m_gamePad.getRawAxis(1), 
-        () -> -m_gamePad.getRawAxis(2) * 0.75
+        () -> m_gamePadDr.getRawAxis(GamePad.LeftStick.kUpDown), 
+        () -> -m_gamePadDr.getRawAxis(GamePad.RightStick.kLeftRight) * 0.75
       ));
     }
 
-    // if (m_driveSubsystem != null && m_Joystick != null) {
-      
-    //   m_driveSubsystem.setDefaultCommand(new ScaledArcadeDriveCommand(m_driveSubsystem, 
-    //     () -> m_gamePad.getRawAxis(1), 
-    //     () -> -m_gamePad.getRawAxis(0) * 0.75
-    //   ));
-    // }
-
-    
-    if (m_ArmSubsystem != null && m_gamePad != null) {
+    if (m_ArmSubsystem != null && m_gamePadO != null) {
       m_ArmSubsystem.setDefaultCommand(new ArmMoveCommand(m_ArmSubsystem, 
-      () -> -m_gamePad.getRawAxis(GamePad.LeftStick.kUpDown) 
+      () -> -m_gamePadO.getRawAxis(GamePad.LeftStick.kUpDown) 
       ));
     }
 
-    if (m_IntakeSubsystem != null && m_gamePad != null) {
+    if (m_IntakeSubsystem != null && m_gamePadO != null) {
       m_IntakeSubsystem.setDefaultCommand(new IntakeMoveCommand(m_IntakeSubsystem, 
-      () -> m_gamePad.getRawAxis(GamePad.RightStick.kUpDown) 
+      () -> m_gamePadO.getRawAxis(GamePad.RightStick.kUpDown) 
       ));
     }
 
@@ -173,8 +159,6 @@ public class RobotContainer {
       //m_autonomousChooser.addOption("Get Moblity, and Charge Test", Autos.testMoblityAndCharge(m_driveSubsystem, () -> Autos.pitchSupplier(m_driveSubsystem)));
 
       m_autonomousChooser.addOption("*****Drop, Mobillity, Charge****", Autos.DropMoblityTurnAndCharge(m_ArmSubsystem, m_IntakeSubsystem, m_driveSubsystem));
-
-      //m_autonomousChooser.addOption("rotate 180", Autos.rotate180(m_driveSubsystem));
 
       m_autonomousChooser.setDefaultOption("Do Nothing", Autos.doNothing());
     

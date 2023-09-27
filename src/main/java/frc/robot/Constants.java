@@ -48,8 +48,9 @@ public final class Constants {
     // Connections to the Drivers' Station Laptop
     public static final class Laptop {
         public final class UsbPort {
-            public static final int kGamePad = 2;
-            public static final int kFlightJoystick = 3;
+            public static final int kGamePadO = 2;
+            public static final int kGamePadDr = 3;
+            // public static final int kFlightJoystick = 3;
         }
     }
 
