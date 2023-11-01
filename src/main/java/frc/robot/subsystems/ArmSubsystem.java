@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -20,6 +21,7 @@ public class ArmSubsystem extends SubsystemBase {
     
     //Defineing the arm encoder
     public RelativeEncoder m_armEncoder;
+    public RelativeEncoder m_armFollowerEncoder;
    
    
     public ArmSubsystem() {
@@ -30,8 +32,10 @@ public class ArmSubsystem extends SubsystemBase {
 
         // Need  value for Arm Encoder in Constents
         m_armEncoder = m_armLeader.getEncoder();
-        
-        m_armEncoder.setPositionConversionFactor(0);
+        m_armFollowerEncoder = m_armFollower.getEncoder();
+        m_armEncoder.setPosition(0);
+        m_armFollowerEncoder.setPosition(0);
+       // m_armEncoder.setPositionConversionFactor(0);
 
         //m_armMotor.setSmartCurrentLimit(30, 90, 10);
     }
@@ -89,8 +93,13 @@ public class ArmSubsystem extends SubsystemBase {
   public void ArmGo(double forwardSpeed) {
 
     forwardSpeed = applyLinearConstraints(forwardSpeed);
-
-    m_MotorControllerGroup.set(forwardSpeed);
+    if ( m_armEncoder.getPosition() < 125 || forwardSpeed < 0) {
+      m_MotorControllerGroup.set(forwardSpeed);
+    }
+    else{
+      m_MotorControllerGroup.set(0);
+    }
+    
   }
 
   // public void ArmGoEncoder(double speed) {
@@ -114,7 +123,8 @@ public class ArmSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Arm Motor Speed", m_armLeader.get());
-    
+    SmartDashboard.putNumber("arm Encoder", m_armEncoder.getPosition());
+    SmartDashboard.putNumber("arm follower Encoder", m_armFollowerEncoder.getPosition());
   }
 
 
