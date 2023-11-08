@@ -126,7 +126,7 @@ public class ArmSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("arm Encoder", m_armEncoder.getPosition());
     SmartDashboard.putNumber("arm follower Encoder", m_armFollowerEncoder.getPosition());
   }
-
+  
 
   // public Command ArmForward(double speed) {
   //   return startEnd(() -> {this.m_armMotor.set(0.5);}, () -> {m_armMotor.set(0.0);});

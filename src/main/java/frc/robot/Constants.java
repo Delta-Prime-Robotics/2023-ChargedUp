@@ -114,5 +114,19 @@ public final class Constants {
         }    
     }
 
+    public static final class Arm {
+        public final class LeftMotor{
+            public static final double kA = 1;
+            public static final double kG = 1;
+            public static final double kV = 1;
+            public static final double kS = 1;
+        }
+        public final class RightMotor{
+            public static final double kA = 1;
+            public static final double kG = 1;
+            public static final double kV = 1;
+            public static final double kS = 1;
+        }
+    }
     
 }
