@@ -13,14 +13,9 @@ import frc.robot.Constants.Arm.*;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ArmPIDControler extends PIDCommand {
-  ArmFeedforward feedforward = new ArmFeedforward(
-    Constants.Arm.LeftMotor.kS,
-     Constants.Arm.LeftMotor.kG,
-     Constants.Arm.LeftMotor.kV,
-     Constants.Arm.LeftMotor.kA);
+public class ArmPIDCommand extends PIDCommand {
   /** Creates a new ArmPIDControler. */
-  public ArmPIDControler() {
+  public ArmPIDCommand() {
     super(
         // The controller that the command will use
         new PIDController(0, 0, 0),
